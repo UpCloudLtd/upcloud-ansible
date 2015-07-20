@@ -161,13 +161,13 @@ EXAMPLES = '''
 from distutils.version import LooseVersion
 import os
 
-# make sure that upcloud-api-python is installed
+# make sure that upcloud-api is installed
 HAS_UPCLOUD = True
 try:
-    import upcloud
-    from upcloud import CloudManager
+    import upcloud_api
+    from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud.__version__) < LooseVersion('0.3.0'):
+    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.0'):
         HAS_UPCLOUD = False
 
 except ImportError, e:
@@ -311,7 +311,7 @@ def main():
     #
 
     if not HAS_UPCLOUD:
-        module.fail_json(msg='upcloud-api-python required for this module (`pip install upcloud-api-python`)')
+        module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
 
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')

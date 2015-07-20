@@ -37,15 +37,15 @@ options:
         description:
         - UpCloud API password. Can be set as environment variable.
     hostname:
-        description: 
+        description:
         - Hostname of the target server to be (un)tagged. Hostname or uuid is needed.
     uuid:
-        description: 
+        description:
         - UUID of the target server to be (un)tagged. Hostname or uuid is needed.
     firewall_rules:
-        description: 
+        description:
         - List of firewall rules (strings)
-notes: 
+notes:
     - UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables may be used instead of api_user and api_passwd
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
 requirements:
@@ -55,7 +55,7 @@ requirements:
 
 EXAMPLES = '''
 
-# Make sure that the firewall rules below are present. 
+# Make sure that the firewall rules below are present.
 # If any given field does not match an existing host rule,
 # a new rule will be created.
 
@@ -82,7 +82,7 @@ EXAMPLES = '''
         destination_port_end: 21, 
         action: reject
 
-# Make sure that the firewall rule below is not present. 
+# Make sure that the firewall rule below is not present.
 # If all given fields match a host rule, that rule will be deleted.
 
 - name: open port 22
@@ -124,12 +124,12 @@ EXAMPLES = '''
 from distutils.version import LooseVersion
 import os
 
-# make sure that upcloud-api-python is installed
+# make sure that upcloud-api is installed
 HAS_UPCLOUD = True
 try:
     import upcloud_api
     from upcloud_api import CloudManager
-    
+
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.1'):
         HAS_UPCLOUD = False
 
@@ -146,11 +146,11 @@ class FirewallManager():
 
     def determine_server_uuid(self, hostname):
         """
-        Return uuid based on hostname. 
+        Return uuid based on hostname.
         Fail if there are duplicates of the given hostname.
         """
         servers = self.manager.get_servers()
-        
+
         found_servers = []
         for server in servers:
             if server.hostname == hostname:
@@ -161,12 +161,12 @@ class FirewallManager():
 
         if len(found_servers) == 1:
             return found_servers[0].uuid
-        else: 
+        else:
             self.module.fail_json(msg='No server was found with hostname: ' + hostname)
 
     def match_firewall_rules(self, given_rule, host_rules):
         """
-        Checks given_rule against every host_rule. 
+        Checks given_rule against every host_rule.
         False if no matches were found, True if a match was found.
         """
         def match_firewall_rule(given_rule, host_rule):
@@ -176,7 +176,7 @@ class FirewallManager():
                     return False
             return True
 
-        # Theoretically O(n^2) worst case, but in practice it is much closer to O(n)        
+        # Theoretically O(n^2) worst case, but in practice it is much closer to O(n)
         for host_rule in host_rules:
             if match_firewall_rule(given_rule, host_rule):
                 return True, host_rule.position
@@ -192,7 +192,7 @@ def run(module, firewall_manager):
     - absent:
         delete any given rule that matches an existing one
     """
-    
+
     state =          module.params['state']
     firewall_rules = module.params['firewall_rules']
     uuid =           module.params.get('uuid')
@@ -204,12 +204,12 @@ def run(module, firewall_manager):
         uuid = firewall_manager.determine_server_uuid(hostname)
 
     host_rules = firewall_manager.manager.get_firewall_rules(uuid)
-    
+
     # match every rule against host_rules
     if state == 'present':
         for rule in firewall_rules:
             matched, position = firewall_manager.match_firewall_rules(rule, host_rules)
-            
+
             # create any given rule that didn't match existing rules
             if not matched:
                 firewall_manager.manager.create_firewall_rule(uuid, rule)
@@ -229,11 +229,11 @@ def run(module, firewall_manager):
 
                     # update host_rules from API to get new positions
                     host_rules = firewall_manager.manager.get_firewall_rules(uuid)
-                else: 
+                else:
                     break
-            
+
     module.exit_json(changed=changed)
-        
+
 
 
 def main():
@@ -244,9 +244,9 @@ def main():
             state = dict(choices=['present', 'absent'], default='present'),
             api_user = dict(aliases=['UPCLOUD_API_USER'], no_log=True),
             api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
-            
+
             hostname = dict(type='str'),
-            uuid = dict(aliases=['id'], type='str'),            
+            uuid = dict(aliases=['id'], type='str'),
             firewall_rules = dict(type='list', required=True)
         ),
         required_one_of = (
@@ -254,12 +254,12 @@ def main():
         )
     )
 
-    
+
     # ensure dependencies and API credentials are in place
     #
 
     if not HAS_UPCLOUD:
-        module.fail_json(msg='upcloud-api-python required for this module (`pip install upcloud-api-python`)')
+        module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
 
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')

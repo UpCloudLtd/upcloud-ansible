@@ -37,16 +37,16 @@ options:
         description:
         - UpCloud API password. Can be set as environment variable.
     hostname:
-        description: 
+        description:
         - Hostname of the target server to be (un)tagged. Hostname or uuid is needed.
     uuid:
-        description: 
+        description:
         - UUID of the target server to be (un)tagged. Hostname or uuid is needed.
     tags:
-        description: 
+        description:
         - List of tags (strings)
-notes: 
-    - This module will create missing tags (tags have to be created before assigning), but will not remove tags 
+notes:
+    - This module will create missing tags (tags have to be created before assigning), but will not remove tags
       as this could lead into tags being removed from other than the target server.
     - UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables may be used instead of api_user and api_passwd
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
@@ -79,12 +79,12 @@ EXAMPLES = '''
 from distutils.version import LooseVersion
 import os
 
-# make sure that upcloud-api-python is installed
+# make sure that upcloud-api is installed
 HAS_UPCLOUD = True
 try:
     import upcloud_api
     from upcloud_api import CloudManager
-    
+
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.1'):
         HAS_UPCLOUD = False
 
@@ -114,11 +114,11 @@ class TagManager():
 
     def determine_server_uuid(self, hostname):
         """
-        Return uuid based on hostname. 
+        Return uuid based on hostname.
         Fail if there are duplicates of the given hostname.
         """
         servers = self.manager.get_servers()
-        
+
         found_servers = []
         for server in servers:
             if server.hostname == hostname:
@@ -129,7 +129,7 @@ class TagManager():
 
         if len(found_servers) == 1:
             return found_servers[0].uuid
-        else: 
+        else:
             self.module.fail_json(msg='No server was found with hostname: ' + hostname)
 
     def get_host_tags(self, uuid):
@@ -142,12 +142,12 @@ def run(module, tag_manager):
     Act based on desired state and given tags.
     - present:
         create any given tags not present in upcloud's available tags
-        add any given tags not present to host 
+        add any given tags not present to host
     - absent:
         remove any given tags present from the host
         (don't remove them from upcloud's available tags, might be present in other servers)
     """
-    
+
     state =     module.params['state']
     tags =      module.params['tags']
     uuid =      module.params.get('uuid')
@@ -157,10 +157,10 @@ def run(module, tag_manager):
 
     if not uuid:
         uuid = tag_manager.determine_server_uuid(hostname)
-    
+
     # make sure the host has all tags
     if state == 'present':
-        
+
         # tags must exist in UpCloud before thay can be assigned
         tag_manager.create_missing_tags(tags)
 
@@ -169,7 +169,7 @@ def run(module, tag_manager):
         # tags - host_tags = tags_to_add
         tags_to_add = [ tag for tag in tags if tag not in host_tags ]
 
-        if tags_to_add:            
+        if tags_to_add:
             tag_manager.manager.assign_tags(uuid, tags)
             changed=True
 
@@ -186,7 +186,7 @@ def run(module, tag_manager):
         if len(tags_to_remove) > 0:
             changed = True
             tag_manager.manager.remove_tags(uuid, tags_to_remove)
-        
+
         module.exit_json(changed=changed)
 
 
@@ -198,9 +198,9 @@ def main():
             state = dict(choices=['present', 'absent'], default='present'),
             api_user = dict(aliases=['UPCLOUD_API_USER'], no_log=True),
             api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
-            
+
             hostname = dict(type='str'),
-            uuid = dict(aliases=['id'], type='str'),            
+            uuid = dict(aliases=['id'], type='str'),
             tags = dict(type='list', required=True)
         ),
         required_one_of = (
@@ -208,12 +208,12 @@ def main():
         )
     )
 
-    
+
     # ensure dependencies and API credentials are in place
     #
 
     if not HAS_UPCLOUD:
-        module.fail_json(msg='upcloud-api-python required for this module (`pip install upcloud-api-python`)')
+        module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
 
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
