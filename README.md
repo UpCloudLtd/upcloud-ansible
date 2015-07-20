@@ -7,6 +7,16 @@ There is an [open PR](https://github.com/ansible/ansible/pull/11586) for the inv
 within Ansible and the plan is to open a PR for the modules to
 [ansible-modules-extra](https://github.com/ansible/ansible-modules-extras)
 
+**Dependencies and supported versions**
+
+* `upcloud-api` 3.0.1 must be installed, `pip install upcloud-api` or get the sources from
+  [Github](https://github.com/UpCloudLtd/upcloud-python-api)
+* python 2.6 and 2.7 are supported by `upcloud-api`
+* tested with ansible 1.9 (and devel)
+
+Note for OS X users:
+* install ansible with homebrew can make it hard to know what Python ansible is using, using `pip install ansible` is recommended
+
 ## Inventory script
 
 **Installation**
