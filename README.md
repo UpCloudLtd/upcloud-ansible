@@ -1,9 +1,9 @@
 # upcloud-ansible
 Dynamic inventory and modules for managing servers via UpCloud's API
 
-The inventory script and modules contain documentation and examples as per 
-[Ansible's developer guidelines](http://docs.ansible.com/developing_modules.html). 
-There is an [open PR](https://github.com/ansible/ansible/pull/11586) for the inventory script to be included 
+The inventory script and modules contain documentation and examples as per
+[Ansible's developer guidelines](http://docs.ansible.com/developing_modules.html).
+There is an [open PR](https://github.com/ansible/ansible/pull/11586) for the inventory script to be included
 within Ansible and the plan is to open a PR for the modules to
 [ansible-modules-extra](https://github.com/ansible/ansible-modules-extras)
 
@@ -34,7 +34,7 @@ Note for OS X users:
 ansible all -m ping -i /path/to/upcloud.py
 
 # match all servers from upcloud inventory script
-ansible upcloud-all -m ping -i /path/to/upcloud.py
+ansible uc-all -m ping -i /path/to/upcloud.py
 
 # inventory group servers by upcloud Tags
 ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
@@ -45,13 +45,13 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 **Installation**
 
 * move the modules to a location of your choice
-* make sure to add the location of your choice into library path: 
+* make sure to add the location of your choice into library path:
     * [ansible.cfg](http://docs.ansible.com/intro_configuration.html#library)
     * [environment variable or CLI option](http://docs.ansible.com/developing_modules.html)
 
 **Usage**
 
-See the source files for documentation and examples. You may also want to refer to 
+See the source files for documentation and examples. You may also want to refer to
 [UpCloud's API documentation](https://www.upcloud.com/api/)
 
 The following example shows off some of the features of `upcloud`, `upcloud_tag` and `upcloud_firewall` modules:
@@ -66,20 +66,20 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
 
   tasks:
     - name: Create upcloud server
-      upcloud:    
+      upcloud:
         state: present
         hostname: web1.example.com
         title: web1.example.com
         zone: uk-lon1
         plan: 1xCPU-1GB
-        storage_devices: 
+        storage_devices:
             - { size: 30, os: Ubuntu 14.04 }
             - { size: 100 }
       register: upcloud_server # upcloud_server.server will contain the API response body
 
     # upcloud_server.public_ip shortcut will contain a public IPv4 (preferred) or IPv6 address
     - name: remove new server from known_hosts in case of IP collision
-      known_hosts: 
+      known_hosts:
         state: absent
         host: "{{ upcloud_server.public_ip }}"
 
