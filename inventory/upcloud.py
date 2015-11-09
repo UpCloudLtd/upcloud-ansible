@@ -134,18 +134,14 @@ def list_servers(manager, get_ip_address=False):
 
             # group by tags
             for tag in server.tags:
-                if tag in groups:
-                    groups[tag].append(hostname_or_ip)
-                else:
+                if tag not in groups:
                     groups[tag] = []
-                    groups[tag].append(hostname_or_ip)
+                groups[tag].append(hostname_or_ip)
 
             # group by zones
-            if server.zone in groups:
-                groups[server.zone].append(hostname_or_ip)
-            else:
+            if server.zone not in groups:
                 groups[server.zone] = []
-                groups[server.zone].append(hostname_or_ip)
+            groups[server.zone].append(hostname_or_ip)
 
     print(json.dumps(groups))
 
