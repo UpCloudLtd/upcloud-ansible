@@ -78,16 +78,20 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
       register: upcloud_server # upcloud_server.server will contain the API response body
 
     # upcloud_server.public_ip shortcut will contain a public IPv4 (preferred) or IPv6 address
+    # this task is not needed if host_key_checking=False in ansible
     - name: remove new server from known_hosts in case of IP collision
       known_hosts:
         state: absent
         host: "{{ upcloud_server.public_ip }}"
 
-    # small wait to make sure created server is online (might not be instantly after API response)
-    - pause: seconds=5
+
+    - name: Wait for SSH to come up
+      wait_for: host={{ upcloud_server.public_ip }} port=22 delay=5 timeout=320 state=started
+
 
     # upcloud_server.server.password and upcloud_server.server.username
     # can be used to drop in an SSH key. e.g. with https://gist.github.com/elnygren/965a6db4f3fd8e242e90
+    # note: this step can be skipped by using a custom template with your SSH keys preloaded
     - name: Place ssh key on the server
       shell: >
         ./rsync_ssh_key.sh ~/.ssh/id_rsa.pub
