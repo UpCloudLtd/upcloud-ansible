@@ -23,7 +23,6 @@ module: upcloud_tag
 short_description: Add/remove tags to/from UpCloud servers
 description:
     - Create new tags and add them to, or remove them, from UpCloud servers
-version_added: "1.9"
 author: "Elias Nygren (@elnygren)"
 options:
     state:
@@ -52,7 +51,7 @@ notes:
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
 requirements:
   - "python >= 2.6"
-  - "upcloud-api >= 3.0.1"
+  - "upcloud-api >= 0.3.4"
 '''
 
 EXAMPLES = '''

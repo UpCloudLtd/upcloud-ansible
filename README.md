@@ -48,6 +48,8 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 * make sure to add the location of your choice into library path:
     * [ansible.cfg](http://docs.ansible.com/intro_configuration.html#library)
     * [environment variable or CLI option](http://docs.ansible.com/developing_modules.html)
+* ...or provide module path when invoking ansible:
+    * `ansible-playbook -M /path/to/modules/dir playbook.yml`
 
 **Usage**
 
@@ -75,7 +77,12 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         storage_devices:
             - { size: 30, os: Ubuntu 14.04 }
             - { size: 100 }
+        user: upclouduser
+        ssh_keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
+            - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
       register: upcloud_server # upcloud_server.server will contain the API response body
+
 
     # upcloud_server.public_ip shortcut will contain a public IPv4 (preferred) or IPv6 address
     # this task is not needed if host_key_checking=False in ansible
@@ -89,20 +96,12 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
       wait_for: host={{ upcloud_server.public_ip }} port=22 delay=5 timeout=320 state=started
 
 
-    # upcloud_server.server.password and upcloud_server.server.username
-    # can be used to drop in an SSH key. e.g. with https://gist.github.com/elnygren/965a6db4f3fd8e242e90
-    # note: this step can be skipped by using a custom template with your SSH keys preloaded
-    - name: Place ssh key on the server
-      shell: >
-        ./rsync_ssh_key.sh ~/.ssh/id_rsa.pub
-        root@{{upcloud_server.public_ip}}:/root/.ssh/authorized_keys
-        {{upcloud_server.server.password}}
-
     - name: tag the created server
       upcloud_tag:
         state: present
         uuid: "{{ upcloud_server.server.uuid }}"
         tags: [ webservers, london ]
+
 
     - name: configure firewall
       upcloud_firewall:
@@ -141,5 +140,3 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         - direction: in
           action: reject
 ```
-
-

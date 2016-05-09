@@ -23,7 +23,6 @@ module: upcloud
 short_description: Create/delete a server in UpCloud
 description:
     - Create/delete a server in UpCloud or ensure that an existing server is started
-version_added: "1.9"
 author: "Elias Nygren (@elnygren)"
 options:
     state:
@@ -86,6 +85,7 @@ options:
     password_delivery:
         description:
         - Optional string. Password delivery method. UpCloud Ansible module grabs SSH credentials from API response.
+        - UpCloud's API client defaults to 'none' (as opposed to 'email' or 'sms')
     nic_model:
         description:
         - Optional string. Network adapter in UpCloud.
@@ -95,12 +95,20 @@ options:
     avoid_host:
         description:
         - Optional string or integer. Host ID in UpCloud.
+    user:
+        description:
+        - Optional string. Linux user that should be created with given ssh_keys.
+        - When user and ssh_keys are being used, no password is delivered in API response.
+    ssh_keys:
+        description:
+        - Optional list of strings. SSH keys that should be added to the given user.
+        - When user and ssh_keys are being used, no password is delivered in API response.
 notes:
     - UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables may be used instead of api_user and api_passwd
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
 requirements:
   - "python >= 2.6"
-  - "upcloud-api"
+  - "upcloud-api >= 0.3.4"
 '''
 
 EXAMPLES = '''
@@ -119,43 +127,23 @@ EXAMPLES = '''
     storage_devices:
         - { size: 30, os: Ubuntu 14.04 }
         - { size: 100 }
+    user: upclouduser
+    ssh_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
+        - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
   register: upcloud_server
 
 - debug: msg="upcloud_server => {{ upcloud_server }}"
 
+- name: Wait for SSH to come up
+    wait_for: host={{ upcloud_server.public_ip }} port=22 delay=5 timeout=320 state=started
+
+# tip: hostname can also be used to destroy a server
 - name: Destroy upcloud server
   upcloud:
     state: absent
     uuid: "{{ upcloud_server.server.uuid }}"
 
-
-# Create a server, catch SSH credentials and place a SSH key on the server.
-# This example uses scp_ssh_key.sh, example available at:
-
-- name: Create upcloud server
-  upcloud:
-    state: present
-    hostname: www13.example.com
-    title: www13.example.com
-    zone: uk-lon1
-    plan: 1xCPU-1GB
-    storage_devices:
-        - { size: 30, os: Ubuntu 14.04 }
-        - { size: 100 }
-  register: upcloud_server
-
-# check here if {{ upcloud_server.server.password }} exists as it is present only if the server was created
-# in case the server was just started, it probably has the key already (assuming similar script to this was used)
-
-- pause: seconds=5
-
-- name: remove new server from known_hosts in case of IP-address collision
-  known_hosts:
-    state: absent
-    host: "{{ upcloud_server.public_ip }}"
-
-- name: Place ssh key on the server
-  shell: "./scp_ssh_key.sh ~/.ssh/id_rsa.pub root@{{upcloud_server.public_ip}}:/root/.ssh/authorized_keys {{upcloud_server.server.password}}"
 '''
 
 from distutils.version import LooseVersion
@@ -167,7 +155,7 @@ try:
     import upcloud_api
     from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.0'):
+    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.4'):
         HAS_UPCLOUD = False
 
 except ImportError, e:
@@ -219,8 +207,16 @@ class ServerManager():
 
         # filter out 'filter_keys' and those who equal None from items to get server's attributes for POST request
         items = module.params.items()
-        filter_keys = ['state', 'api_user', 'api_passwd']
+        filter_keys = set(['state', 'api_user', 'api_passwd', 'user', 'ssh_keys'])
         server_dict = dict((key,value) for key, value in items if key not in filter_keys and value is not None)
+
+        if module.params.get('ssh_keys') and module.params.get('user'):
+            login_user = upcloud_api.login_user_block(
+                username=module.params['user'],
+                ssh_keys=module.params['ssh_keys'],
+                create_password=False
+            )
+            server_dict['login_user'] = login_user
 
         return self.manager.create_server(server_dict)
 
@@ -282,6 +278,8 @@ def main():
             memory_amount = dict(type='int'),
             ip_addresses = dict(type='list'),
             firewall = dict(type='bool'),
+            ssh_keys = dict(type='list'),
+            user = dict(type='str'),
 
             # optional, nice-to-have
             vnc = dict(type='bool'),
@@ -295,7 +293,8 @@ def main():
         ),
         required_together = (
             ['core_number', 'memory_amount'],
-            ['api_user', 'api_passwd']
+            ['api_user', 'api_passwd'],
+            ['ssh_keys', 'user']
         ),
         mutually_exclusive = (
             ['plan', 'core_number'],
