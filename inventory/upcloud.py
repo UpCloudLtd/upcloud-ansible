@@ -205,12 +205,12 @@ def read_api_credentials(config):
     username = os.getenv("UPCLOUD_API_USER")
     password = os.getenv("UPCLOUD_API_PASSWD")
 
-    if not username and not password:
+    if not (username and password):
         if config.has_option('upcloud', 'UPCLOUD_API_USER') and config.has_option('upcloud', 'UPCLOUD_API_PASSWD'):
             username = config.get('upcloud', 'UPCLOUD_API_USER')
             password = config.get('upcloud', 'UPCLOUD_API_PASSWD')
 
-    if not username and not password:
+    if not (username and password):
         err_msg = "Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD as environment variables or at upcloud.ini"
         sys.stderr.write(err_msg)
         sys.exit(-1)
