@@ -9,7 +9,7 @@ within Ansible and the plan is to open a PR for the modules to
 
 **Dependencies and supported versions**
 
-* `upcloud-api` 0.3.4 must be installed, `pip install upcloud-api` or get the sources from
+* `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
 * python 2.6 and 2.7 are supported by `upcloud-api`
 * tested with ansible 1.9, 2.0
@@ -52,6 +52,13 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
     * `ansible-playbook -M /path/to/modules/dir playbook.yml`
 
 **Usage**
+
+```
+
+# you can specify inventory and Modules pathes via cli
+ansible-playbook create-servers.yml -i /path/to/upcloud.py -M /path/to/upcloud/modules
+
+```
 
 See the source files for documentation and examples. You may also want to refer to
 [UpCloud's API documentation](https://www.upcloud.com/api/)
