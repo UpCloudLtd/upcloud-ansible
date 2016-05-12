@@ -9,10 +9,10 @@ within Ansible and the plan is to open a PR for the modules to
 
 **Dependencies and supported versions**
 
-* `upcloud-api` 3.0.1 must be installed, `pip install upcloud-api` or get the sources from
+* `upcloud-api` 0.3.4 must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
 * python 2.6 and 2.7 are supported by `upcloud-api`
-* tested with ansible 1.9 (and devel)
+* tested with ansible 1.9, 2.0
 
 Note for OS X users:
 * install ansible with homebrew can make it hard to know what Python ansible is using, using `pip install ansible` is recommended
