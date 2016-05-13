@@ -99,6 +99,7 @@ options:
         description:
         - Optional string. Linux user that should be created with given ssh_keys.
         - When user and ssh_keys are being used, no password is delivered in API response.
+        - UpCloud's API defaults to 'root' user
     ssh_keys:
         description:
         - Optional list of strings. SSH keys that should be added to the given user.
@@ -210,9 +211,9 @@ class ServerManager():
         filter_keys = set(['state', 'api_user', 'api_passwd', 'user', 'ssh_keys'])
         server_dict = dict((key,value) for key, value in items if key not in filter_keys and value is not None)
 
-        if module.params.get('ssh_keys') and module.params.get('user'):
+        if module.params.get('ssh_keys'):
             login_user = upcloud_api.login_user_block(
-                username=module.params['user'],
+                username=module.params.get('user'),
                 ssh_keys=module.params['ssh_keys'],
                 create_password=False
             )
@@ -293,8 +294,7 @@ def main():
         ),
         required_together = (
             ['core_number', 'memory_amount'],
-            ['api_user', 'api_passwd'],
-            ['ssh_keys', 'user']
+            ['api_user', 'api_passwd']
         ),
         mutually_exclusive = (
             ['plan', 'core_number'],
