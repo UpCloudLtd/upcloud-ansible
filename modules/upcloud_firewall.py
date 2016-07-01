@@ -129,7 +129,7 @@ try:
     import upcloud_api
     from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.1'):
+    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.5'):
         HAS_UPCLOUD = False
 
 except ImportError, e:
