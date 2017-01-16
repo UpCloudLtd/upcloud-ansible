@@ -113,9 +113,9 @@ def assign_ips_to_servers(servers):
         object.__setattr__(server, 'ip_addresses', [])
 
     # assign IPs to their corresponding server
-    ips = manager.get_IPs()
+    ips = manager.get_ips()
     for ip in ips:
-        servermap[ip.server_uuid].ip_addresses.append(ip)
+        servermap[ip.server].ip_addresses.append(ip)
 
 
 def list_servers(manager, get_ip_address=False):
@@ -162,10 +162,10 @@ def get_server(manager, search_item, with_ip_addresses):
         return namespaced_server_dict
 
     if with_ip_addresses:
-        ips = manager.get_IPs()
+        ips = manager.get_ips()
         for ip in ips:
             if ip.address == search_item:
-                server = manager.get_server(ip.server_uuid)
+                server = manager.get_server(ip.server)
                 server_dict = namespace_fields(server)
                 print(json.dumps(server_dict))
                 return
