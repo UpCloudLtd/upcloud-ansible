@@ -104,6 +104,13 @@ options:
         description:
         - Optional list of strings. SSH keys that should be added to the given user.
         - When user and ssh_keys are being used, no password is delivered in API response.
+    user_data:
+        description:
+        - Optional string.
+        - Initialization scripts can only be used with Linux servers created from public templates.
+        - An initialization script will get executed on your cloud server when it boots up the first time
+        - Initialization scripts also support CoreOS’ Cloud-config format and you simply only need to begin the script with #cloud-config to use it. And if the initialization script contains only a single line which begins with http:// or https:// the content is used as a URL address from which the script is fetched and executed during the cloud servers first boot.
+
 notes:
     - UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables may be used instead of api_user and api_passwd
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
@@ -243,7 +250,7 @@ def run(module, server_manager):
 
         server.ensure_started()
 
-        module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip())
+        module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip(), private_ip=server.get_private_ip())
 
     elif state == 'absent':
         server = server_manager.find_server(uuid, hostname)
@@ -281,6 +288,7 @@ def main():
             firewall = dict(type='bool'),
             ssh_keys = dict(type='list'),
             user = dict(type='str'),
+            user_data = dict(type='str'),
 
             # optional, nice-to-have
             vnc = dict(type='bool'),
