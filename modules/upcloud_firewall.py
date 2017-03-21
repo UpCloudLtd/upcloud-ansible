@@ -37,10 +37,13 @@ options:
         - UpCloud API password. Can be set as environment variable.
     hostname:
         description:
-        - Hostname of the target server to be (un)tagged. Hostname or uuid is needed.
+        - Hostname of the target server to be (un)tagged. Hostname, IP-address or uuid is needed.
+    ip_address:
+        description:
+        - IP address of the target server to be (un)tagged. Hostname, IP-address or uuid is needed.
     uuid:
         description:
-        - UUID of the target server to be (un)tagged. Hostname or uuid is needed.
+        - UUID of the target server to be (un)tagged. Hostname, IP-address or uuid is needed.
     firewall_rules:
         description:
         - List of firewall rules (strings)
@@ -121,6 +124,8 @@ EXAMPLES = '''
 '''
 
 from distutils.version import LooseVersion
+from upcloud_api.errors import UpCloudClientError, UpCloudAPIError
+
 import os
 
 # make sure that upcloud-api is installed
@@ -143,7 +148,7 @@ class FirewallManager():
         self.manager = upcloud_api.CloudManager(username, password)
         self.module = module
 
-    def determine_server_uuid(self, hostname):
+    def determine_server_uuid_by_hostname(self, hostname):
         """
         Return uuid based on hostname.
         Fail if there are duplicates of the given hostname.
@@ -162,6 +167,20 @@ class FirewallManager():
             return found_servers[0].uuid
         else:
             self.module.fail_json(msg='No server was found with hostname: ' + hostname)
+
+    def determine_server_uuid_by_ip(self, ip_address):
+        """
+        Return uuid based on IP-address.
+        Fail if Upcloud doesn't know the IP-address
+        """
+        try:
+            machine = self.manager.get_server_by_ip(ip_address)
+            return machine.uuid
+        except UpCloudAPIError as e:
+            if e.error_code == 'IP_ADDRESS_NOT_FOUND':
+                self.module.fail_json(msg='No server was found with IP-address: ' + ip_address)
+            else:
+                raise
 
     def match_firewall_rules(self, given_rule, host_rules):
         """
@@ -196,11 +215,15 @@ def run(module, firewall_manager):
     firewall_rules = module.params['firewall_rules']
     uuid =           module.params.get('uuid')
     hostname =       module.params.get('hostname')
+    ip_address =     module.params.get('ip_address')
 
     changed = False
 
     if not uuid:
-        uuid = firewall_manager.determine_server_uuid(hostname)
+        if hostname:
+            uuid = firewall_manager.determine_server_uuid_by_hostname(hostname)
+        elif ip_address:
+            uuid = firewall_manager.determine_server_uuid_by_ip(ip_address)
 
     host_rules = firewall_manager.manager.get_firewall_rules(uuid)
 
@@ -245,11 +268,12 @@ def main():
             api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
 
             hostname = dict(type='str'),
+            ip_address = dict(type='str'),
             uuid = dict(aliases=['id'], type='str'),
             firewall_rules = dict(type='list', required=True)
         ),
         required_one_of = (
-            ['uuid', 'hostname'],
+            ['uuid', 'hostname','ip_address'],
         )
     )
 
