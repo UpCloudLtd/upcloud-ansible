@@ -109,7 +109,7 @@ notes:
     - Better description of UpCloud's API available at U(www.upcloud.com/api/)
 requirements:
   - "python >= 2.6"
-  - "upcloud-api >= 0.3.4"
+  - "upcloud-api >= 0.3.3"
 '''
 
 EXAMPLES = '''
@@ -156,7 +156,7 @@ try:
     import upcloud_api
     from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.4'):
+    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.3'):
         HAS_UPCLOUD = False
 
 except ImportError, e:
