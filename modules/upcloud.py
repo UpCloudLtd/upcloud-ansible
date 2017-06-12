@@ -29,7 +29,7 @@ options:
         description:
         - Desired state of the target
         default: present
-        choices: ['present', 'absent']
+        choices: ['present', 'absent','stopped']
     api_user:
         description:
         - UpCloud API username. Can be set as environment variable.
@@ -245,6 +245,16 @@ def run(module, server_manager):
 
         module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip())
 
+    elif state == 'stopped':
+        server = server_manager.find_server(uuid, hostname)
+
+        if server:
+            if server.state=='started':
+                server.shutdown()
+                module.exit_json(changed=True, msg="stopped" + server.hostname)
+
+        module.exit_json(changed=False, msg="server absent (didn't exist in the first place)")
+
     elif state == 'absent':
         server = server_manager.find_server(uuid, hostname)
 
@@ -260,7 +270,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec = dict(
-            state = dict(choices=['present', 'absent'], default='present'),
+            state = dict(choices=['present', 'absent', 'stopped'], default='present'),
             api_user = dict(aliases=['CLIENT_ID'], no_log=True),
             api_passwd = dict(aliases=['API_KEY'], no_log=True),
 
