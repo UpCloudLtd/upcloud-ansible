@@ -65,9 +65,9 @@ options:
         - Optional array of IP-address dicts. Server's IP-addresses in UpCloud. UpCloud assigns 1 public and 1 private IPv4 by default.
     firewall:
         description:
-        - Bool. Firewall on/off in UpCloud.
-        default: no
-        choices: [ "yes", "no" ]
+        - String. Firewall on/off in UpCloud.
+        default: off
+        choices: [ "on", "off" ]
     vnc:
         description:
         - Bool. VNC on/off in UpCloud.
@@ -278,7 +278,7 @@ def main():
             core_number = dict(type='int'),
             memory_amount = dict(type='int'),
             ip_addresses = dict(type='list'),
-            firewall = dict(type='bool'),
+            firewall = dict(type='str'),
             ssh_keys = dict(type='list'),
             user = dict(type='str'),
 
