@@ -232,8 +232,8 @@ if __name__ == "__main__":
 
     # decide whether to return hostnames or ip_addresses
     with_ip_addresses = False
-    if config.has_option('upcloud', 'return_ip_addresses') and config.get('upcloud', 'return_ip_addresses'):
-        with_ip_addresses = True
+    if config.has_option('upcloud', 'return_ip_addresses'):
+        with_ip_addresses = str(config.get('upcloud', 'return_ip_addresses')).lower() == "true"
 
     if args.return_ip_addresses:
         with_ip_addresses = True
