@@ -85,15 +85,18 @@ except ImportError:
     import simplejson as json
 
 
-def get_hostname_or_ip(server, get_ip_address=False):
+def get_hostname_or_ip(server, get_ip_address=False, get_non_fqdn_name=False):
     """Returns a server's hostname. If get_ip_address==True, returns its public IP-address."""
     if get_ip_address:
         # prevent API request during get_public_ip, as IPs were matched manually
         # bypass server.__setattr__ as setting populated is not normallow allowed by the class
         object.__setattr__(server, 'populated', True)
-        return server.get_public_ip()
+        return [server.get_public_ip()]
 
-    return server.hostname
+    hostname=server.hostname.split('.')[0]
+    if get_non_fqdn_name and hostname != server.hostname:
+      return [server.hostname, server.hostname.split('.')[0]]
+    return [server.hostname]
 
 
 def assign_ips_to_servers(servers):
@@ -118,7 +121,7 @@ def assign_ips_to_servers(servers):
         servermap[ip.server].ip_addresses.append(ip)
 
 
-def list_servers(manager, get_ip_address=False):
+def list_servers(manager, get_ip_address=False, return_non_fqdn_names=False):
     """Lists all servers' hostnames. If get_ip_address==True, lists IP-addresses."""
     servers = manager.get_servers()
 
@@ -129,24 +132,24 @@ def list_servers(manager, get_ip_address=False):
     groups["uc-all"] = []
     for server in servers:
         if server.state == 'started':
-            hostname_or_ip = get_hostname_or_ip(server, get_ip_address)
-            groups["uc-all"].append(hostname_or_ip)
+            for hostname_or_ip in get_hostname_or_ip(server, get_ip_address, return_non_fqdn_names):
+              groups["uc-all"].append(hostname_or_ip)
 
-            # group by tags
-            for tag in server.tags:
-                if tag not in groups:
-                    groups[tag] = []
-                groups[tag].append(hostname_or_ip)
+              # group by tags
+              for tag in server.tags:
+                  if tag not in groups:
+                      groups[tag] = []
+                  groups[tag].append(hostname_or_ip)
 
-            # group by zones
-            if server.zone not in groups:
-                groups[server.zone] = []
-            groups[server.zone].append(hostname_or_ip)
+              # group by zones
+              if server.zone not in groups:
+                  groups[server.zone] = []
+              groups[server.zone].append(hostname_or_ip)
 
     print(json.dumps(groups))
 
 
-def get_server(manager, search_item, with_ip_addresses):
+def get_server(manager, search_item, with_ip_addresses, return_non_fqdn_names=False):
     """
     Handles --host.
 
@@ -172,7 +175,8 @@ def get_server(manager, search_item, with_ip_addresses):
 
     servers = manager.get_servers()
     for server in servers:
-        if server.hostname == search_item or server.uuid == search_item:
+        server_name = server.hostname.split('.')[0]
+        if (return_non_fqdn_names and search_item == server_name) or server.hostname == search_item or server.uuid == search_item:
             server.populate()
             server_dict = namespace_fields(server)
             print(json.dumps(server_dict))
@@ -232,15 +236,19 @@ if __name__ == "__main__":
 
     # decide whether to return hostnames or ip_addresses
     with_ip_addresses = False
+    return_non_fqdn_names = False
+
     if config.has_option('upcloud', 'return_ip_addresses'):
         with_ip_addresses = str(config.get('upcloud', 'return_ip_addresses')).lower() == "true"
+    if config.has_option('upcloud', 'return_non_fqdn_names'):
+        return_non_fqdn_names = str(config.get('upcloud', 'return_non_fqdn_names')).lower() == "true"
 
     if args.return_ip_addresses:
         with_ip_addresses = True
 
     # choose correct action
     if args.list:
-        list_servers(manager, with_ip_addresses)
+        list_servers(manager, with_ip_addresses, return_non_fqdn_names)
 
     elif args.host:
-        get_server(manager, args.host, with_ip_addresses)
+        get_server(manager, args.host, with_ip_addresses, return_non_fqdn_names)
