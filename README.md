@@ -125,8 +125,8 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         - direction: in
           family: IPv4
           protocol: tcp
-          destination_port_start: 22 
-          destination_port_end: 22 
+          destination_port_start: 22
+          destination_port_end: 22
           action: accept
 
         - direction: in
