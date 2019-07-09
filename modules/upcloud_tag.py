@@ -197,7 +197,7 @@ def run(module, tag_manager):
 
         module.exit_json(changed=changed)
 
-    # makse sure the host has none of the specified tags
+    # make sure the host has none of the specified tags
     if state == 'absent':
 
         host_tags = tag_manager.get_host_tags(uuid)
