@@ -167,7 +167,7 @@ class ServerManager():
     """Helpers for managing upcloud.Server instance"""
 
     def __init__(self, api_user, api_passwd):
-        self.manager = CloudManager(api_user, api_passwd)
+        self.manager = CloudManager(api_user, api_passwd, 300)
 
 
     def find_server(self, uuid, hostname):
