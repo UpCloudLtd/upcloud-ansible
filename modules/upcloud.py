@@ -166,8 +166,8 @@ except ImportError, e:
 class ServerManager():
     """Helpers for managing upcloud.Server instance"""
 
-    def __init__(self, api_user, api_passwd):
-        self.manager = CloudManager(api_user, api_passwd, 300)
+    def __init__(self, api_user, api_passwd, default_timeout):
+        self.manager = CloudManager(api_user, api_passwd, default_timeout)
 
 
     def find_server(self, uuid, hostname):
@@ -314,6 +314,9 @@ def main():
 
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
+    default_timeout = os.getenv('UPCLOUD_API_DEFTIMEOUT')
+    if not default_timeout:
+        default_timeout = module.params.get('upcloud', 'default_timeout') or None
 
     if not api_user or not api_passwd:
         module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
@@ -323,7 +326,7 @@ def main():
     # Note: UpCloud's API has good error messages that the api client passes on.
     #
 
-    server_manager = ServerManager(api_user, api_passwd)
+    server_manager = ServerManager(api_user, api_passwd, default_timeout)
     try:
         run(module, server_manager)
     except Exception as e:

@@ -27,6 +27,8 @@ Note for OS X users:
 * you may wish to use `return_ip_addresses = True` in .ini to ensure that SSH works (hostnames may not be in DNS)
 * information on configuring the inventory without specifying `-i` every time:
 [http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx](http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx)
+* Define upcloud api user and password in the .ini file or in env variables.
+* Default timeout is defined either in the .ini file or as env variable. (default is 300s)
 
 **Usage**
 
