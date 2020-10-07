@@ -314,7 +314,7 @@ def main():
 
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
-    default_timeout = os.getenv('UPCLOUD_API_DEFTIMEOUT')
+    default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
     if not default_timeout:
         default_timeout = module.params.get('upcloud', 'default_timeout') or None
 
