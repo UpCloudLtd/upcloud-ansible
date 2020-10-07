@@ -232,7 +232,10 @@ if __name__ == "__main__":
 
     # setup API connection
     username, password = read_api_credentials(config)
-    manager = upcloud_api.CloudManager(username, password)
+    default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
+    if not default_timeout:
+        default_timeout = config.get('upcloud', 'default_timeout') or None
+    manager = upcloud_api.CloudManager(username, password, default_timeout)
 
     # decide whether to return hostnames or ip_addresses
     with_ip_addresses = False
