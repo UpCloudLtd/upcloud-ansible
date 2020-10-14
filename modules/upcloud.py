@@ -315,16 +315,17 @@ def main():
     api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
     api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
     default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
+
     if not default_timeout:
-        default_timeout = module.params.get('upcloud', 'default_timeout') or None
+        default_timeout = None
+    else:
+        default_timeout = float(default_timeout)
 
     if not api_user or not api_passwd:
         module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
 
-
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.
-    #
 
     server_manager = ServerManager(api_user, api_passwd, default_timeout)
     try:

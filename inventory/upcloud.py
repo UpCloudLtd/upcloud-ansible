@@ -232,10 +232,17 @@ if __name__ == "__main__":
 
     # setup API connection
     username, password = read_api_credentials(config)
-    default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
+    default_timeout = os.getenv('UPCLOUD_API_TIMEOUT') or config.get('upcloud', 'default_timeout')
     if not default_timeout:
-        default_timeout = config.get('upcloud', 'default_timeout') or None
+        default_timeout = None
+    else:
+        default_timeout = float(default_timeout)
     manager = upcloud_api.CloudManager(username, password, default_timeout)
+
+    # In case user doesn't use env variables, we might need them in modules
+    os.environ['UPCLOUD_API_USER'] = username
+    os.environ['UPCLOUD_API_PASSWD'] = password
+    os.environ['UPCLOUD_API_TIMEOUT'] = default_timeout
 
     # decide whether to return hostnames or ip_addresses
     with_ip_addresses = False
