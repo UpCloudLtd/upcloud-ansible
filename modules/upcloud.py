@@ -149,6 +149,7 @@ EXAMPLES = '''
 
 from distutils.version import LooseVersion
 import os
+import ConfigParser
 
 # make sure that upcloud-api is installed
 HAS_UPCLOUD = True
@@ -305,9 +306,7 @@ def main():
         ),
     )
 
-
     # ensure dependencies and API credentials are in place
-    #
 
     if not HAS_UPCLOUD:
         module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
@@ -317,7 +316,7 @@ def main():
     default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
 
     if not default_timeout:
-        default_timeout = None
+        default_timeout = 300
     else:
         default_timeout = float(default_timeout)
 

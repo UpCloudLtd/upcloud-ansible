@@ -239,11 +239,6 @@ if __name__ == "__main__":
         default_timeout = float(default_timeout)
     manager = upcloud_api.CloudManager(username, password, default_timeout)
 
-    # In case user doesn't use env variables, we might need them in modules
-    os.environ['UPCLOUD_API_USER'] = username
-    os.environ['UPCLOUD_API_PASSWD'] = password
-    os.environ['UPCLOUD_API_TIMEOUT'] = default_timeout
-
     # decide whether to return hostnames or ip_addresses
     with_ip_addresses = False
     return_non_fqdn_names = False
