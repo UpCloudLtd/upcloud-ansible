@@ -149,7 +149,10 @@ EXAMPLES = '''
 
 from distutils.version import LooseVersion
 import os
-import ConfigParser
+try:
+    import configparser
+except:
+    from six.moves import configparser
 
 # make sure that upcloud-api is installed
 HAS_UPCLOUD = True

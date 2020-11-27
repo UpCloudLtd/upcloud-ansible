@@ -68,7 +68,11 @@ An example response for reference:
 import os
 import sys
 import argparse
-import ConfigParser
+try:
+    import configparser
+except:
+    from six.moves import configparser
+
 
 try:
     import upcloud_api
@@ -227,7 +231,7 @@ if __name__ == "__main__":
     # read settings
     args = read_cli_args()
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + '/upcloud.ini')
 
     # setup API connection
