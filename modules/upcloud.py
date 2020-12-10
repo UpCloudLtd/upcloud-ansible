@@ -149,7 +149,10 @@ EXAMPLES = '''
 
 from distutils.version import LooseVersion
 import os
-import ConfigParser
+try:
+    import configparser
+except:
+    from six.moves import configparser
 
 # make sure that upcloud-api is installed
 HAS_UPCLOUD = True
@@ -222,9 +225,23 @@ class ServerManager():
 
         return self.manager.create_server(server_dict)
 
+def return_error_msg_due_to_faulty_ini_file(missing_variable):
+    err_msg = "Could not find {} variable in the ini file. Please check if the ini is configured correctly.".format(missing_variable)
+    sys.stderr.write(err_msg)
+    sys.exit(-1)
+
 
 def run(module, server_manager):
     """create/destroy/start server based on its current state and desired state"""
+
+    config = configparser.ConfigParser()
+    config.read(os.path.dirname(os.path.realpath(__file__)) + '../inventory/upcloud.ini')
+
+    if config.has_option('upcloud', 'default_ipv_version'):
+        default_ipv_version = config.get('upcloud', 'default_ipv_version')
+    else:
+        return_error_msg_due_to_faulty_ini_file('default_ipv_version')
+
 
     state = module.params['state']
     uuid = module.params.get('uuid')
@@ -244,7 +261,7 @@ def run(module, server_manager):
 
         server.ensure_started()
 
-        module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip())
+        module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip(addr_family=default_ipv_version))
 
     elif state == 'absent':
         server = server_manager.find_server(uuid, hostname)

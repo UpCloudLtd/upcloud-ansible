@@ -4,14 +4,14 @@ Dynamic inventory and modules for managing servers via UpCloud's API
 The inventory script and modules contain documentation and examples as per
 [Ansible's developer guidelines](http://docs.ansible.com/developing_modules.html).
 There is an [open PR](https://github.com/ansible/ansible/pull/11586) for the inventory script to be included
-within Ansible and the plan is to open a PR for the modules to
-[ansible-modules-extra](https://github.com/ansible/ansible-modules-extras)
+within Ansible and the plan is to open a PR for the modules too
+[ansible](https://github.com/ansible/ansible)
 
 **Dependencies and supported versions**
 
 * `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
-* python 2.6 and 2.7 are supported by `upcloud-api`
+* python 2.7, 3.6 and higher versions are supported by `upcloud-api`
 * tested with ansible 1.9, 2.0 and all the way to 2.8.4.
 * It should work with whatever is the newest version of ansible, if not, please create an issue about it.
 
@@ -148,5 +148,5 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
 
         # default rule last:
         - direction: in
-          action: reject
+          action: drop
 ```

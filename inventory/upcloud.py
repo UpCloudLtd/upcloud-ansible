@@ -68,7 +68,11 @@ An example response for reference:
 import os
 import sys
 import argparse
-import ConfigParser
+try:
+    import configparser
+except:
+    from six.moves import configparser
+
 
 try:
     import upcloud_api
@@ -85,13 +89,16 @@ except ImportError:
     import simplejson as json
 
 
-def get_hostname_or_ip(server, get_ip_address=False, get_non_fqdn_name=False, addr_family='IPv4'):
+def get_hostname_or_ip(server, get_ip_address, get_non_fqdn_name, addr_family):
     """Returns a server's hostname. If get_ip_address==True, returns its public IP-address."""
     if get_ip_address:
         # prevent API request during get_public_ip, as IPs were matched manually
         # bypass server.__setattr__ as setting populated is not normallow allowed by the class
         object.__setattr__(server, 'populated', True)
-        return [server.get_public_ip(addr_family=addr_family)]
+        public_ip_addresses = [server.get_public_ip(addr_family=addr_family)]
+        if len(public_ip_addresses) == 0:
+            public_ip_addresses = [server.get_public_ip()]
+        return public_ip_addresses
 
     hostname=server.hostname.split('.')[0]
     if get_non_fqdn_name and hostname != server.hostname:
@@ -121,7 +128,7 @@ def assign_ips_to_servers(servers):
         servermap[ip.server].ip_addresses.append(ip)
 
 
-def list_servers(manager, get_ip_address=False, return_non_fqdn_names=False, default_ipv_version='IPv4'):
+def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_version):
     """Lists all servers' hostnames. If get_ip_address==True, lists IP-addresses."""
     servers = manager.get_servers()
 
@@ -222,12 +229,18 @@ def read_api_credentials(config):
     return username, password
 
 
+def return_error_msg_due_to_faulty_ini_file(missing_variable):
+    err_msg = "Could not find {} variable in the ini file. Please check if the ini is configured correctly.".format(missing_variable)
+    sys.stderr.write(err_msg)
+    sys.exit(-1)
+
+
 if __name__ == "__main__":
 
     # read settings
     args = read_cli_args()
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + '/upcloud.ini')
 
     # setup API connection
@@ -240,16 +253,20 @@ if __name__ == "__main__":
     manager = upcloud_api.CloudManager(username, password, default_timeout)
 
     # decide whether to return hostnames or ip_addresses
-    with_ip_addresses = False
-    return_non_fqdn_names = False
-    default_ipv_version = 'Ipv4'
-
     if config.has_option('upcloud', 'return_ip_addresses'):
         with_ip_addresses = str(config.get('upcloud', 'return_ip_addresses')).lower() == "true"
+    else:
+        return_error_msg_due_to_faulty_ini_file('return_ip_addresses')
+
     if config.has_option('upcloud', 'return_non_fqdn_names'):
         return_non_fqdn_names = str(config.get('upcloud', 'return_non_fqdn_names')).lower() == "true"
+    else:
+        return_error_msg_due_to_faulty_ini_file('return_non_fqdn_names')
+
     if config.has_option('upcloud', 'default_ipv_version'):
-        default_ipv_version = str(config.get('upcloud', 'default_ipv_version'))
+        default_ipv_version = config.get('upcloud', 'default_ipv_version')
+    else:
+        return_error_msg_due_to_faulty_ini_file('default_ipv_version')
 
     if args.return_ip_addresses:
         with_ip_addresses = True
