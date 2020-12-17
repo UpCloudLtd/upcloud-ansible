@@ -163,7 +163,7 @@ try:
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.4'):
         HAS_UPCLOUD = False
 
-except ImportError, e:
+except ImportError as e:
     HAS_UPCLOUD = False
 
 
@@ -186,7 +186,7 @@ class ServerManager():
             try:
                 server = self.manager.get_server(uuid)
                 return server
-            except Exception, e:
+            except Exception as e:
                 pass # no server found
 
         # try with hostname, if given and nothing was found with uuid
@@ -235,7 +235,7 @@ def run(module, server_manager):
     """create/destroy/start server based on its current state and desired state"""
 
     config = configparser.ConfigParser()
-    config.read(os.path.dirname(os.path.realpath(__file__)) + '../inventory/upcloud.ini')
+    config.read('inventory/upcloud.ini')
 
     if config.has_option('upcloud', 'default_ipv_version'):
         default_ipv_version = config.get('upcloud', 'default_ipv_version')

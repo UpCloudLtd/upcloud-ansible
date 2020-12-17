@@ -137,7 +137,7 @@ try:
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.5'):
         HAS_UPCLOUD = False
 
-except ImportError, e:
+except ImportError as e:
     HAS_UPCLOUD = False
 
 
