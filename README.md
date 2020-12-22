@@ -85,9 +85,10 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         zone: uk-lon1
         plan: 1xCPU-1GB
         storage_devices:
-            - { size: 30, os: Ubuntu 14.04 }
+            - { size: 30, os: Ubuntu 14.04 } # This will soon be changed to use os id instead of name, due to upcloud-python-api changes
             - { size: 100 }
-        user: upclouduser
+        api_user: username
+        api_passwd: password
         ssh_keys:
             - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
             - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host

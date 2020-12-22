@@ -128,7 +128,8 @@ EXAMPLES = '''
     storage_devices:
         - { size: 30, os: Ubuntu 14.04 }
         - { size: 100 }
-    user: upclouduser
+    api_user: username
+    api_passwd: password
     ssh_keys:
         - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
         - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
