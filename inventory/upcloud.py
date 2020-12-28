@@ -136,11 +136,11 @@ def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_ver
         assign_ips_to_servers(servers)
 
     groups = dict()
-    groups["uc-all"] = []
+    groups["uc_all"] = []
     for server in servers:
         if server.state == 'started':
             for hostname_or_ip in get_hostname_or_ip(server, get_ip_address, return_non_fqdn_names, default_ipv_version):
-              groups["uc-all"].append(hostname_or_ip)
+              groups["uc_all"].append(hostname_or_ip)
 
               # group by tags
               for tag in server.tags:
@@ -149,9 +149,10 @@ def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_ver
                   groups[tag].append(hostname_or_ip)
 
               # group by zones
-              if server.zone not in groups:
-                  groups[server.zone] = []
-              groups[server.zone].append(hostname_or_ip)
+              formatted_zone = server.zone.replace('-', '_')
+              if formatted_zone not in groups:
+                  groups[formatted_zone] = []
+              groups[formatted_zone].append(hostname_or_ip)
 
     print(json.dumps(groups))
 
