@@ -37,7 +37,7 @@ Note for OS X users:
 ansible all -m ping -i /path/to/upcloud.py
 
 # match all servers from upcloud inventory script
-ansible uc-all -m ping -i /path/to/upcloud.py
+ansible uc_all -m ping -i /path/to/upcloud.py
 
 # inventory group servers by upcloud Tags
 ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>

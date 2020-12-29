@@ -15,7 +15,7 @@ UPCLOUD_API_USER and UPCLOUD_API_PASSWD.
 The --list argument may also be called: --list --return-ip-addresses to return IP-addresses instead of hostnames.
 UpCloud does not enforce that hostnames are actually reachable over SSH or unique, so this option might be useful.
 
-The groups created by --list match UpCloud's Tags and zones. 'uc-all' group contains all hosts from UpCloud.
+The groups created by --list match UpCloud's Tags and zones. 'uc_all' group contains all hosts from UpCloud.
 
 ---
 
