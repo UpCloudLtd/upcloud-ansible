@@ -123,7 +123,7 @@ def assign_ips_to_servers(servers):
         object.__setattr__(server, 'ip_addresses', [])
 
     # assign IPs to their corresponding server
-    ips = manager.get_ips()
+    ips = manager.get_ips(ignore_ips_without_server=True)
     for ip in ips:
         servermap[ip.server].ip_addresses.append(ip)
 
