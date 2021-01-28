@@ -20,7 +20,7 @@ class MockedManager:
         for server in servers:
             if server.uuid == uuid:
                 return server
-        raise Exception('Server with uuid: {} does not exist in test data')
+        raise Exception('Server with uuid: {} does not exist in test data'.format(uuid))
 
     def create_server(self, server):
         return Server._create_server_obj(server, cloud_manager=self)
