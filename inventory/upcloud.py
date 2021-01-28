@@ -106,7 +106,7 @@ def get_hostname_or_ip(server, get_ip_address, get_non_fqdn_name, addr_family):
     return [server.hostname]
 
 
-def assign_ips_to_servers(servers):
+def assign_ips_to_servers(manager, servers):
     """
     Queries all IP-addresses from UpCloud and matches them with servers.
     This is an optimisation; we manually populate IP-addresses to the server objects
@@ -133,7 +133,7 @@ def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_ver
     servers = manager.get_servers()
 
     if get_ip_address:
-        assign_ips_to_servers(servers)
+        assign_ips_to_servers(manager, servers)
 
     groups = dict()
     groups["uc_all"] = []

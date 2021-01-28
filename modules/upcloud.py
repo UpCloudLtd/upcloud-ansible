@@ -208,18 +208,18 @@ class ServerManager():
         return None
 
 
-    def create_server(self, module):
-        """Create a server from module.params. Filters out unwanted attributes."""
+    def create_server(self, module_params):
+        """Create a server from module parameters. Filters out unwanted attributes."""
 
         # filter out 'filter_keys' and those who equal None from items to get server's attributes for POST request
-        items = module.params.items()
+        items = module_params.items()
         filter_keys = set(['state', 'api_user', 'api_passwd', 'user', 'ssh_keys'])
         server_dict = dict((key,value) for key, value in items if key not in filter_keys and value is not None)
 
-        if module.params.get('ssh_keys'):
+        if module_params.get('ssh_keys'):
             login_user = upcloud_api.login_user_block(
-                username=module.params.get('user'),
-                ssh_keys=module.params['ssh_keys'],
+                username=module_params.get('user'),
+                ssh_keys=module_params['ssh_keys'],
                 create_password=False
             )
             server_dict['login_user'] = login_user
@@ -255,7 +255,7 @@ def run(module, server_manager):
 
         if not server:
             # create server, if one was not found
-            server = server_manager.create_server(module)
+            server = server_manager.create_server(module.params)
         else:
             if server.state=='started':
                 changed = False

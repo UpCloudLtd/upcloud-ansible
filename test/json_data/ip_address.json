@@ -1,0 +1,13 @@
+{
+    "ip_addresses": {
+        "ip_address": [
+            {
+                "access": "private",
+                "address": "10.1.0.101",
+                "family": "IPv4",
+                "ptr_record": "",
+                "server": "008c365d-d307-4501-8efc-cd6d3bb0e494"
+            }
+        ]
+    }
+}
