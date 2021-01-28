@@ -1,6 +1,5 @@
 from itertools import product
 from inventory.upcloud import list_servers, get_server
-import pytest
 
 class TestUpcloud(object):
     def test_find_server(self, server_manager):
@@ -14,12 +13,8 @@ class TestUpcloud(object):
             server_should_exist = found_by_uuid or found_by_hostname
             server = server_manager.find_server(config[0], config[1])
 
-            if server_should_exist and not server:
-                pytest.set_trace()
-
             if server_should_exist:
                 assert server.uuid == server_uuid or server.hostname == server_hostname
-
             else:
                 assert server is None
 
