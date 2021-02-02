@@ -5,3 +5,4 @@ __pycache__
 ENV/
 .tox
 *.pyc
+.pytest_cache

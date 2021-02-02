@@ -151,3 +151,21 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         - direction: in
           action: drop
 ```
+
+Tests located in `project_root/test/` directory. Run with:
+
+```python
+py.test test/
+```
+
+To test against all supported python versions, run:
+
+```python
+tox
+```
+
+To check for possible vulnerabilities in python packages, run:
+
+```python
+safety check
+```
