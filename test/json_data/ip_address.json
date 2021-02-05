@@ -2,7 +2,7 @@
     "ip_addresses": {
         "ip_address": [
             {
-                "access": "private",
+                "access": "public",
                 "address": "10.1.0.101",
                 "family": "IPv4",
                 "ptr_record": "",

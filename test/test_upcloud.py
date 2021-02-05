@@ -6,6 +6,7 @@ class TestUpcloud(object):
         server_uuid = '008c365d-d307-4501-8efc-cd6d3bb0e494'
         server_hostname = 'fi.example.com'
         possible_configs = list(product([server_uuid, server_hostname, None], repeat=2))
+        assert len(possible_configs) == 9
 
         for config in possible_configs:
             found_by_uuid = config[0] == server_uuid

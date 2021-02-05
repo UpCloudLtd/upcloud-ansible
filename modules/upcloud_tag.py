@@ -109,12 +109,16 @@ class TagManager():
         Create any tags that are present in given_tags but missing from UpCloud.
         """
 
-        upcloud_tags = self.manager.get_tags()
-        upcloud_tags = [ str(uc_tag) for uc_tag in upcloud_tags ]
+        found_upcloud_tags = self.manager.get_tags()
+        found_upcloud_tags = [ str(uc_tag) for uc_tag in found_upcloud_tags ]
+        new_upcloud_tags = []
 
         for given_tag in given_tags:
-            if given_tag not in upcloud_tags:
-                self.manager.create_tag(given_tag)
+            if given_tag not in found_upcloud_tags:
+                new_upcloud_tags.append(self.manager.create_tag(given_tag))
+
+        return new_upcloud_tags
+
 
     def determine_server_uuid_by_hostname(self, hostname):
         """

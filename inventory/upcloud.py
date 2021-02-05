@@ -155,6 +155,7 @@ def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_ver
               groups[formatted_zone].append(hostname_or_ip)
 
     print(json.dumps(groups))
+    return groups
 
 
 def get_server(manager, search_item, with_ip_addresses, return_non_fqdn_names=False):
@@ -179,7 +180,7 @@ def get_server(manager, search_item, with_ip_addresses, return_non_fqdn_names=Fa
                 server = manager.get_server(ip.server)
                 server_dict = namespace_fields(server)
                 print(json.dumps(server_dict))
-                return
+                return server_dict
 
     servers = manager.get_servers()
     for server in servers:
@@ -188,9 +189,10 @@ def get_server(manager, search_item, with_ip_addresses, return_non_fqdn_names=Fa
             server.populate()
             server_dict = namespace_fields(server)
             print(json.dumps(server_dict))
-            return
+            return server_dict
 
     print(json.dumps({}))
+    return {}
 
 
 def read_cli_args():

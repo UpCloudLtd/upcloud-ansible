@@ -1,6 +1,8 @@
 class TestTag(object):
     def test_create_missing_tags(self, tag_manager):
-        tag_manager.create_missing_tags('test')
+        tag = tag_manager.create_missing_tags(['test'])[0]
+        assert type(tag).__name__ == 'Tag'
+        assert tag.name == 'test'
 
     def test_determine_server_uuid_by_hostname(self, tag_manager):
         uuid = tag_manager.determine_server_uuid_by_hostname('fi.example.com')
