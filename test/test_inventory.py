@@ -1,6 +1,7 @@
 from itertools import product
 from inventory.upcloud import list_servers, get_server
 
+
 class TestInventory(object):
     def test_list_servers(self, manager):
         IPvs_to_test = ['IPv4', 'IPv6']

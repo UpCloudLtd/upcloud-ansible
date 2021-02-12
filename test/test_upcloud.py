@@ -1,5 +1,5 @@
 from itertools import product
-from inventory.upcloud import list_servers, get_server
+
 
 class TestUpcloud(object):
     def test_find_server(self, server_manager):
@@ -21,11 +21,11 @@ class TestUpcloud(object):
 
     def test_create_server(self, server_manager):
         server_dict = {
-            'core_number':'2',
-            'memory_amount':'1024',
-            'hostname':'my.example.com',
+            'core_number': '2',
+            'memory_amount': '1024',
+            'hostname': 'my.example.com',
             'zone': 'us-chi1',
-            'storage_devices':[
+            'storage_devices': [
                 {'os': '01000000-0000-4000-8000-000030200200', 'size': 10}
             ],
             'vnc_password': 'my-passwd',
@@ -33,8 +33,8 @@ class TestUpcloud(object):
             'avoid_host': '12345678',
             'user_data': 'https://my.script.com/some_script.py',
             'ip_addresses': [
-                {'family':'IPv4', 'access':'public'},
-                {'family':'IPv6', 'access':'public'}
+                {'family': ' IPv4', 'access': 'public'},
+                {'family': ' IPv6', 'access': 'public'}
             ]
         }
         server = server_manager.manager.create_server(server_dict)

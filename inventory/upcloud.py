@@ -70,7 +70,7 @@ import sys
 import argparse
 try:
     import configparser
-except:
+except ImportError:
     from six.moves import configparser
 
 
@@ -100,9 +100,9 @@ def get_hostname_or_ip(server, get_ip_address, get_non_fqdn_name, addr_family):
             public_ip_addresses = [server.get_public_ip()]
         return public_ip_addresses
 
-    hostname=server.hostname.split('.')[0]
+    hostname = server.hostname.split('.')[0]
     if get_non_fqdn_name and hostname != server.hostname:
-      return [server.hostname, server.hostname.split('.')[0]]
+        return [server.hostname, server.hostname.split('.')[0]]
     return [server.hostname]
 
 
@@ -140,19 +140,19 @@ def list_servers(manager, get_ip_address, return_non_fqdn_names, default_ipv_ver
     for server in servers:
         if server.state == 'started':
             for hostname_or_ip in get_hostname_or_ip(server, get_ip_address, return_non_fqdn_names, default_ipv_version):
-              groups["uc_all"].append(hostname_or_ip)
+                groups["uc_all"].append(hostname_or_ip)
 
               # group by tags
-              for tag in server.tags:
-                  if tag not in groups:
-                      groups[tag] = []
-                  groups[tag].append(hostname_or_ip)
+            for tag in server.tags:
+                if tag not in groups:
+                    groups[tag] = []
+                groups[tag].append(hostname_or_ip)
 
               # group by zones
-              formatted_zone = server.zone.replace('-', '_')
-              if formatted_zone not in groups:
-                  groups[formatted_zone] = []
-              groups[formatted_zone].append(hostname_or_ip)
+            formatted_zone = server.zone.replace('-', '_')
+            if formatted_zone not in groups:
+                groups[formatted_zone] = []
+            groups[formatted_zone].append(hostname_or_ip)
 
     print(json.dumps(groups))
     return groups

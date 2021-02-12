@@ -152,7 +152,7 @@ from distutils.version import LooseVersion
 import os
 try:
     import configparser
-except:
+except ImportError:
     from six.moves import configparser
 
 # make sure that upcloud-api is installed
@@ -164,7 +164,7 @@ try:
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.4'):
         HAS_UPCLOUD = False
 
-except ImportError as e:
+except ImportError:
     HAS_UPCLOUD = False
 
 
@@ -173,7 +173,6 @@ class ServerManager():
 
     def __init__(self, api_user, api_passwd, default_timeout):
         self.manager = CloudManager(api_user, api_passwd, default_timeout)
-
 
     def find_server(self, uuid, hostname):
         """
@@ -187,8 +186,8 @@ class ServerManager():
             try:
                 server = self.manager.get_server(uuid)
                 return server
-            except Exception as e:
-                pass # no server found
+            except Exception:
+                pass  # no server found
 
         # try with hostname, if given and nothing was found with uuid
         if hostname:
@@ -207,14 +206,13 @@ class ServerManager():
 
         return None
 
-
     def create_server(self, module_params):
         """Create a server from module parameters. Filters out unwanted attributes."""
 
         # filter out 'filter_keys' and those who equal None from items to get server's attributes for POST request
         items = module_params.items()
         filter_keys = set(['state', 'api_user', 'api_passwd', 'user', 'ssh_keys'])
-        server_dict = dict((key,value) for key, value in items if key not in filter_keys and value is not None)
+        server_dict = dict((key, value) for key, value in items if key not in filter_keys and value is not None)
 
         if module_params.get('ssh_keys'):
             login_user = upcloud_api.login_user_block(
@@ -225,6 +223,7 @@ class ServerManager():
             server_dict['login_user'] = login_user
 
         return self.manager.create_server(server_dict)
+
 
 def return_error_msg_due_to_faulty_ini_file(missing_variable):
     err_msg = "Could not find {} variable in the ini file. Please check if the ini is configured correctly.".format(missing_variable)
@@ -243,7 +242,6 @@ def run(module, server_manager):
     else:
         return_error_msg_due_to_faulty_ini_file('default_ipv_version')
 
-
     state = module.params['state']
     uuid = module.params.get('uuid')
     hostname = module.params.get('hostname')
@@ -257,7 +255,7 @@ def run(module, server_manager):
             # create server, if one was not found
             server = server_manager.create_server(module.params)
         else:
-            if server.state=='started':
+            if server.state == 'started':
                 changed = False
 
         server.ensure_started()
@@ -278,48 +276,48 @@ def main():
     """main execution path"""
 
     module = AnsibleModule(
-        argument_spec = dict(
-            state = dict(choices=['present', 'absent'], default='present'),
-            api_user = dict(aliases=['CLIENT_ID'], no_log=True),
-            api_passwd = dict(aliases=['API_KEY'], no_log=True),
+        argument_spec=dict(
+            state=dict(choices=['present', 'absent'], default='present'),
+            api_user=dict(aliases=['CLIENT_ID'], no_log=True),
+            api_passwd=dict(aliases=['API_KEY'], no_log=True),
 
             # required for creation
-            title = dict(type='str'),
-            hostname = dict(type='str'),
-            zone = dict(type='str'),
-            storage_devices = dict(type='list'),
+            title=dict(type='str'),
+            hostname=dict(type='str'),
+            zone=dict(type='str'),
+            storage_devices=dict(type='list'),
 
             # required for destroying
-            uuid = dict(aliases=['id'], type='str', default=None),
+            uuid=dict(aliases=['id'], type='str', default=None),
 
             # optional, but useful
-            plan = dict(type='str'),
-            core_number = dict(type='int'),
-            memory_amount = dict(type='int'),
-            ip_addresses = dict(type='list'),
-            firewall = dict(type='bool'),
-            ssh_keys = dict(type='list'),
-            user = dict(type='str'),
+            plan=dict(type='str'),
+            core_number=dict(type='int'),
+            memory_amount=dict(type='int'),
+            ip_addresses=dict(type='list'),
+            firewall=dict(type='bool'),
+            ssh_keys=dict(type='list'),
+            user=dict(type='str'),
 
             # optional, nice-to-have
-            vnc = dict(type='bool'),
-            vnc_password = dict(type='str'),
-            video_model = dict(type='str'),
-            timezone = dict(type='str'),
-            password_delivery = dict(type='str'),
-            nic_model = dict(type='str'),
-            boot_order = dict(type='str'),
-            avoid_host = dict(type='str')
+            vnc=dict(type='bool'),
+            vnc_password=dict(type='str'),
+            video_model=dict(type='str'),
+            timezone=dict(type='str'),
+            password_delivery=dict(type='str'),
+            nic_model=dict(type='str'),
+            boot_order=dict(type='str'),
+            avoid_host=dict(type='str')
         ),
-        required_together = (
+        required_together=(
             ['core_number', 'memory_amount'],
             ['api_user', 'api_passwd']
         ),
-        mutually_exclusive = (
+        mutually_exclusive=(
             ['plan', 'core_number'],
             ['plan', 'memory_amount']
         ),
-        required_one_of = (
+        required_one_of=(
             ['uuid', 'hostname'],
         ),
     )
