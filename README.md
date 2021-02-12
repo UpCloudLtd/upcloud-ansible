@@ -12,7 +12,7 @@ within Ansible and the plan is to open a PR for the modules too
 * `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
 * python 2.7, 3.6 and higher versions are supported by `upcloud-api`
-* tested with ansible 1.9, 2.0 and all the way to 2.8.4.
+* tested with ansible 1.9, 2.0 and all the way to 2.10.6.
 * It should work with whatever is the newest version of ansible, if not, please create an issue about it.
 
 Note for OS X users:
@@ -158,7 +158,7 @@ Tests located in `project_root/test/` directory. Run with:
 py.test test/
 ```
 
-To test against all supported python versions, run:
+To test against all supported python versions, run (will also run flake8 checks):
 
 ```python
 tox
@@ -168,4 +168,16 @@ To check for possible vulnerabilities in python packages, run:
 
 ```python
 safety check
+```
+
+To check for flake8 errors, run:
+
+```python
+flake8
+```
+
+For tests, flake8 and safety check to work - additional dependencies need to be installed:
+
+```python
+pip install -r requirements-dev.txt
 ```

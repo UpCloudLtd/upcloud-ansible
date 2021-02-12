@@ -124,7 +124,7 @@ EXAMPLES = '''
 '''
 
 from distutils.version import LooseVersion
-from upcloud_api.errors import UpCloudClientError, UpCloudAPIError
+from upcloud_api.errors import UpCloudAPIError
 
 import os
 
@@ -132,12 +132,11 @@ import os
 HAS_UPCLOUD = True
 try:
     import upcloud_api
-    from upcloud_api import CloudManager
 
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.5'):
         HAS_UPCLOUD = False
 
-except ImportError as e:
+except ImportError:
     HAS_UPCLOUD = False
 
 
@@ -211,11 +210,11 @@ def run(module, firewall_manager):
         delete any given rule that matches an existing one
     """
 
-    state =          module.params['state']
+    state = module.params['state']
     firewall_rules = module.params['firewall_rules']
-    uuid =           module.params.get('uuid')
-    hostname =       module.params.get('hostname')
-    ip_address =     module.params.get('ip_address')
+    uuid = module.params.get('uuid')
+    hostname = module.params.get('hostname')
+    ip_address = module.params.get('ip_address')
 
     changed = False
 
@@ -237,7 +236,6 @@ def run(module, firewall_manager):
                 firewall_manager.manager.create_firewall_rule(uuid, rule)
                 changed = True
 
-
     # delete any given rule that matches an existing one
     if state == 'absent':
         for rule in firewall_rules:
@@ -257,26 +255,24 @@ def run(module, firewall_manager):
     module.exit_json(changed=changed)
 
 
-
 def main():
     """main execution path"""
 
     module = AnsibleModule(
-        argument_spec = dict(
-            state = dict(choices=['present', 'absent'], default='present'),
-            api_user = dict(aliases=['UPCLOUD_API_USER'], no_log=True),
-            api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
+        argument_spec=dict(
+            state=dict(choices=['present', 'absent'], default='present'),
+            api_user=dict(aliases=['UPCLOUD_API_USER'], no_log=True),
+            api_passwd=dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
 
-            hostname = dict(type='str'),
-            ip_address = dict(type='str'),
-            uuid = dict(aliases=['id'], type='str'),
-            firewall_rules = dict(type='list', required=True)
+            hostname=dict(type='str'),
+            ip_address=dict(type='str'),
+            uuid=dict(aliases=['id'], type='str'),
+            firewall_rules=dict(type='list', required=True)
         ),
-        required_one_of = (
-            ['uuid', 'hostname','ip_address'],
+        required_one_of=(
+            ['uuid', 'hostname', 'ip_address'],
         )
     )
-
 
     # ensure dependencies and API credentials are in place
     #
@@ -289,7 +285,6 @@ def main():
 
     if not api_user or not api_passwd:
         module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
-
 
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.

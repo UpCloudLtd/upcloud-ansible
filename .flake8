@@ -1,30 +1,3 @@
-# Tox (https://tox.readthedocs.io/) is a tool for running tests
-# in multiple virtualenvs. This configuration file will run the
-# test suite on all supported python versions. To use it, "pip install tox"
-# and then run "tox" from this directory.
-
-[tox]
-envlist = py27, py36, py37, py38, py39, pypy3
-skip_missing_interpreters = True
-skipsdist = True
-
-[testenv]
-deps = -rrequirements.txt
-       -rrequirements-dev.txt
-commands = flake8
-           pip install test/dist/upcloud_api_dev.tar.gz
-           safety check
-           py.test test/
-
-[testenv:integration]
-passenv = *
-deps = -rrequirements.txt
-       -rrequirements-dev.txt
-commands = flake8
-           pip install test/dist/upcloud_api_dev.tar.gz
-           safety check
-           py.test test/ {posargs: -x}
-
 [flake8]
 ignore = D100,  # missing docstring in public module
          D105,

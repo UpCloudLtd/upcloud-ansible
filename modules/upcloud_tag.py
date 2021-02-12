@@ -79,7 +79,7 @@ EXAMPLES = '''
 '''
 
 from distutils.version import LooseVersion
-from upcloud_api.errors import UpCloudClientError, UpCloudAPIError
+from upcloud_api.errors import UpCloudAPIError
 
 import os
 
@@ -87,12 +87,11 @@ import os
 HAS_UPCLOUD = True
 try:
     import upcloud_api
-    from upcloud_api import CloudManager
 
     if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.1'):
         HAS_UPCLOUD = False
 
-except ImportError as e:
+except ImportError:
     HAS_UPCLOUD = False
 
 
@@ -103,14 +102,13 @@ class TagManager():
         self.manager = upcloud_api.CloudManager(username, password)
         self.module = module
 
-
     def create_missing_tags(self, given_tags):
         """
         Create any tags that are present in given_tags but missing from UpCloud.
         """
 
         found_upcloud_tags = self.manager.get_tags()
-        found_upcloud_tags = [ str(uc_tag) for uc_tag in found_upcloud_tags ]
+        found_upcloud_tags = [str(uc_tag) for uc_tag in found_upcloud_tags]
         new_upcloud_tags = []
 
         for given_tag in given_tags:
@@ -118,7 +116,6 @@ class TagManager():
                 new_upcloud_tags.append(self.manager.create_tag(given_tag))
 
         return new_upcloud_tags
-
 
     def determine_server_uuid_by_hostname(self, hostname):
         """
@@ -156,7 +153,7 @@ class TagManager():
 
     def get_host_tags(self, uuid):
         host_tags = self.manager.get_server(uuid).tags
-        return [ str(host_tag) for host_tag in host_tags ]
+        return [str(host_tag) for host_tag in host_tags]
 
 
 def run(module, tag_manager):
@@ -170,11 +167,11 @@ def run(module, tag_manager):
         (don't remove them from upcloud's available tags, might be present in other servers)
     """
 
-    state =         module.params['state']
-    tags =          module.params['tags']
-    uuid =          module.params.get('uuid')
-    hostname =      module.params.get('hostname')
-    ip_address =    module.params.get('ip_address')
+    state = module.params['state']
+    tags = module.params['tags']
+    uuid = module.params.get('uuid')
+    hostname = module.params.get('hostname')
+    ip_address = module.params.get('ip_address')
 
     changed = False
 
@@ -193,11 +190,11 @@ def run(module, tag_manager):
         host_tags = tag_manager.get_host_tags(uuid)
 
         # tags - host_tags = tags_to_add
-        tags_to_add = [ tag for tag in tags if tag not in host_tags ]
+        tags_to_add = [tag for tag in tags if tag not in host_tags]
 
         if tags_to_add:
             tag_manager.manager.assign_tags(uuid, tags)
-            changed=True
+            changed = True
 
         module.exit_json(changed=changed)
 
@@ -207,7 +204,7 @@ def run(module, tag_manager):
         host_tags = tag_manager.get_host_tags(uuid)
 
         # intersection of tags and host_tags
-        tags_to_remove = [ tag for tag in tags if tag in host_tags ]
+        tags_to_remove = [tag for tag in tags if tag in host_tags]
 
         if len(tags_to_remove) > 0:
             changed = True
@@ -220,21 +217,20 @@ def main():
     """main execution path"""
 
     module = AnsibleModule(
-        argument_spec = dict(
-            state = dict(choices=['present', 'absent'], default='present'),
-            api_user = dict(aliases=['UPCLOUD_API_USER'], no_log=True),
-            api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
+        argument_spec=dict(
+            state=dict(choices=['present', 'absent'], default='present'),
+            api_user=dict(aliases=['UPCLOUD_API_USER'], no_log=True),
+            api_passwd=dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
 
-            hostname = dict(type='str'),
-            ip_address = dict(type='str'),
-            uuid = dict(aliases=['id'], type='str'),
-            tags = dict(type='list', required=True)
+            hostname=dict(type='str'),
+            ip_address=dict(type='str'),
+            uuid=dict(aliases=['id'], type='str'),
+            tags=dict(type='list', required=True)
         ),
-        required_one_of = (
+        required_one_of=(
             ['uuid', 'hostname', 'ip_address'],
         )
     )
-
 
     # ensure dependencies and API credentials are in place
     #
@@ -247,7 +243,6 @@ def main():
 
     if not api_user or not api_passwd:
         module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
-
 
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.

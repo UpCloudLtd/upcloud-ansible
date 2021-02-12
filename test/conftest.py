@@ -42,8 +42,10 @@ class MockedManager:
         for server in servers:
             if server.get('uuid') == uuid:
                 server_data = server
-        IPAddresses = IPAddress._create_ip_address_objs(server.pop('ip_addresses'),
-                                                          cloud_manager=self)
+        IPAddresses = IPAddress._create_ip_address_objs(
+            server.pop('ip_addresses'),
+            cloud_manager=self
+        )
 
         storages = Storage._create_storage_objs(server.pop('storage_devices'),
                                                 cloud_manager=self)
@@ -51,7 +53,11 @@ class MockedManager:
 
     def get_ips(self, ignore_ips_without_server=False):
         data = self.read_json_data('ip_address')
-        IPs = IPAddress._create_ip_address_objs(data.get('ip_addresses'), self, ignore_ips_without_server)
+        IPs = IPAddress._create_ip_address_objs(
+            data.get('ip_addresses'),
+            self,
+            ignore_ips_without_server
+        )
         return IPs
 
     def get_tags(self):
@@ -60,7 +66,7 @@ class MockedManager:
 
     def create_tag(self, name, description=None, servers=[]):
         tag = {
-            'name':name
+            'name': name
         }
         if description:
             tag['description'] = description
@@ -81,31 +87,38 @@ class MockedManager:
             data = json.load(json_file)
         return data
 
+
 class MockedServerManager(ServerManager):
     def __init__(self, manager):
         self.manager = manager
+
 
 class MockedTagManager(TagManager):
     def __init__(self, manager):
         self.manager = manager
 
+
 class MockedFirewallManager(FirewallManager):
     def __init__(self, manager):
         self.manager = manager
 
+
 @pytest.fixture(scope='module')
 def manager():
     return MockedManager()
+
 
 @pytest.fixture(scope='module')
 def server_manager():
     manager = MockedManager()
     return MockedServerManager(manager)
 
+
 @pytest.fixture(scope='module')
 def tag_manager():
     manager = MockedManager()
     return MockedTagManager(manager)
+
 
 @pytest.fixture(scope='module')
 def firewall_manager():
