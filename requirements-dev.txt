@@ -1,3 +1,4 @@
+ansible==2.10.6
 attrs==20.3.0
 black~=21.4b1
 coverage==5.5
@@ -33,4 +34,5 @@ toml==0.10.2
     #   dparse
     #   pep517
     #   pytest
+upcloud-api==2.0.0
 urllib3==1.25.9
