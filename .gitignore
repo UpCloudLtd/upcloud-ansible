@@ -6,3 +6,4 @@ ENV/
 .tox
 *.pyc
 .pytest_cache
+.vscode/

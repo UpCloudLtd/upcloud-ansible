@@ -16,7 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
-DOCUMENTATION = '''
+from six.moves import configparser
+import os
+import sys
+from ansible.module_utils.basic import AnsibleModule
+from distutils.version import LooseVersion
+
+DOCUMENTATION = """
 ---
 
 module: upcloud
@@ -110,9 +116,9 @@ notes:
 requirements:
   - "python >= 2.6"
   - "upcloud-api >= 0.3.4"
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 
 # Create and destroy a server.
 # Step 1: If www1.example.com exists, ensure it is started. If it doesn't exist, create it.
@@ -146,14 +152,8 @@ EXAMPLES = '''
     state: absent
     uuid: "{{ upcloud_server.server.uuid }}"
 
-'''
+"""
 
-from distutils.version import LooseVersion
-import os
-try:
-    import configparser
-except ImportError:
-    from six.moves import configparser
 
 # make sure that upcloud-api is installed
 HAS_UPCLOUD = True
@@ -161,18 +161,16 @@ try:
     import upcloud_api
     from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.4'):
-        HAS_UPCLOUD = False
-
 except ImportError:
     HAS_UPCLOUD = False
 
 
-class ServerManager():
+class ServerManager:
     """Helpers for managing upcloud.Server instance"""
 
-    def __init__(self, api_user, api_passwd, default_timeout):
+    def __init__(self, api_user, api_passwd, default_timeout, module):
         self.manager = CloudManager(api_user, api_passwd, default_timeout)
+        self.module = module
 
     def find_server(self, uuid, hostname):
         """
@@ -199,7 +197,9 @@ class ServerManager():
                     found_servers.append(server)
 
             if len(found_servers) > 1:
-                module.fail_json(msg='More than one server matched the given hostname. Please use unique hostnames.')
+                self.module.fail_json(
+                    msg="More than one server matched the given hostname. Please use unique hostnames."
+                )
 
             if len(found_servers) == 1:
                 return found_servers[0]
@@ -209,24 +209,31 @@ class ServerManager():
     def create_server(self, module_params):
         """Create a server from module parameters. Filters out unwanted attributes."""
 
-        # filter out 'filter_keys' and those who equal None from items to get server's attributes for POST request
+        # filter out 'filter_keys' and those who equal None from items to get
+        # server's attributes for POST request
         items = module_params.items()
-        filter_keys = set(['state', 'api_user', 'api_passwd', 'user', 'ssh_keys'])
-        server_dict = dict((key, value) for key, value in items if key not in filter_keys and value is not None)
+        filter_keys = set(["state", "api_user", "api_passwd", "user", "ssh_keys"])
+        server_dict = dict(
+            (key, value)
+            for key, value in items
+            if key not in filter_keys and value is not None
+        )
 
-        if module_params.get('ssh_keys'):
+        if module_params.get("ssh_keys"):
             login_user = upcloud_api.login_user_block(
-                username=module_params.get('user'),
-                ssh_keys=module_params['ssh_keys'],
-                create_password=False
+                username=module_params.get("user"),
+                ssh_keys=module_params["ssh_keys"],
+                create_password=False,
             )
-            server_dict['login_user'] = login_user
+            server_dict["login_user"] = login_user
 
         return self.manager.create_server(server_dict)
 
 
 def return_error_msg_due_to_faulty_ini_file(missing_variable):
-    err_msg = "Could not find {} variable in the ini file. Please check if the ini is configured correctly.".format(missing_variable)
+    err_msg = "Could not find {} variable in the ini file. Please check if the ini is configured correctly.".format(
+        missing_variable
+    )
     sys.stderr.write(err_msg)
     sys.exit(-1)
 
@@ -235,41 +242,47 @@ def run(module, server_manager):
     """create/destroy/start server based on its current state and desired state"""
 
     config = configparser.ConfigParser()
-    config.read('inventory/upcloud.ini')
+    config.read("inventory/upcloud.ini")
 
-    if config.has_option('upcloud', 'default_ipv_version'):
-        default_ipv_version = config.get('upcloud', 'default_ipv_version')
+    if config.has_option("upcloud", "default_ipv_version"):
+        default_ipv_version = config.get("upcloud", "default_ipv_version")
     else:
-        return_error_msg_due_to_faulty_ini_file('default_ipv_version')
+        return_error_msg_due_to_faulty_ini_file("default_ipv_version")
 
-    state = module.params['state']
-    uuid = module.params.get('uuid')
-    hostname = module.params.get('hostname')
+    state = module.params["state"]
+    uuid = module.params.get("uuid")
+    hostname = module.params.get("hostname")
 
     changed = True
 
-    if state == 'present':
+    if state == "present":
         server = server_manager.find_server(uuid, hostname)
 
         if not server:
             # create server, if one was not found
             server = server_manager.create_server(module.params)
         else:
-            if server.state == 'started':
+            if server.state == "started":
                 changed = False
 
         server.ensure_started()
 
-        module.exit_json(changed=changed, server=server.to_dict(), public_ip=server.get_public_ip(addr_family=default_ipv_version))
+        module.exit_json(
+            changed=changed,
+            server=server.to_dict(),
+            public_ip=server.get_public_ip(addr_family=default_ipv_version),
+        )
 
-    elif state == 'absent':
+    elif state == "absent":
         server = server_manager.find_server(uuid, hostname)
 
         if server:
             server.stop_and_destroy()
             module.exit_json(changed=True, msg="destroyed" + server.hostname)
 
-        module.exit_json(changed=False, msg="server absent (didn't exist in the first place)")
+        module.exit_json(
+            changed=False, msg="server absent (didn't exist in the first place)"
+        )
 
 
 def main():
@@ -277,59 +290,52 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(choices=['present', 'absent'], default='present'),
-            api_user=dict(aliases=['CLIENT_ID'], no_log=True),
-            api_passwd=dict(aliases=['API_KEY'], no_log=True),
-
+            state=dict(choices=["present", "absent"], default="present"),
+            api_user=dict(aliases=["CLIENT_ID"], no_log=True),
+            api_passwd=dict(aliases=["API_KEY"], no_log=True),
             # required for creation
-            title=dict(type='str'),
-            hostname=dict(type='str'),
-            zone=dict(type='str'),
-            storage_devices=dict(type='list'),
-
+            title=dict(type="str"),
+            hostname=dict(type="str"),
+            zone=dict(type="str"),
+            storage_devices=dict(type="list"),
             # required for destroying
-            uuid=dict(aliases=['id'], type='str', default=None),
-
+            uuid=dict(aliases=["id"], type="str", default=None),
             # optional, but useful
-            plan=dict(type='str'),
-            core_number=dict(type='int'),
-            memory_amount=dict(type='int'),
-            ip_addresses=dict(type='list'),
-            firewall=dict(type='bool'),
-            ssh_keys=dict(type='list'),
-            user=dict(type='str'),
-
+            plan=dict(type="str"),
+            core_number=dict(type="int"),
+            memory_amount=dict(type="int"),
+            ip_addresses=dict(type="list"),
+            firewall=dict(type="bool"),
+            ssh_keys=dict(type="list"),
+            user=dict(type="str"),
             # optional, nice-to-have
-            vnc=dict(type='bool'),
-            vnc_password=dict(type='str'),
-            video_model=dict(type='str'),
-            timezone=dict(type='str'),
-            password_delivery=dict(type='str'),
-            nic_model=dict(type='str'),
-            boot_order=dict(type='str'),
-            avoid_host=dict(type='str')
+            vnc=dict(type="bool"),
+            vnc_password=dict(type="str"),
+            video_model=dict(type="str"),
+            timezone=dict(type="str"),
+            password_delivery=dict(type="str"),
+            nic_model=dict(type="str"),
+            boot_order=dict(type="str"),
+            avoid_host=dict(type="str"),
         ),
         required_together=(
-            ['core_number', 'memory_amount'],
-            ['api_user', 'api_passwd']
+            ["core_number", "memory_amount"],
+            ["api_user", "api_passwd"],
         ),
-        mutually_exclusive=(
-            ['plan', 'core_number'],
-            ['plan', 'memory_amount']
-        ),
-        required_one_of=(
-            ['uuid', 'hostname'],
-        ),
+        mutually_exclusive=(["plan", "core_number"], ["plan", "memory_amount"]),
+        required_one_of=(["uuid", "hostname"],),
     )
 
     # ensure dependencies and API credentials are in place
 
     if not HAS_UPCLOUD:
-        module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
+        module.fail_json(
+            msg="upcloud-api required for this module (`pip install upcloud-api`)"
+        )
 
-    api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
-    api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
-    default_timeout = os.getenv('UPCLOUD_API_TIMEOUT')
+    api_user = module.params.get("api_user") or os.getenv("UPCLOUD_API_USER")
+    api_passwd = module.params.get("api_passwd") or os.getenv("UPCLOUD_API_PASSWD")
+    default_timeout = os.getenv("UPCLOUD_API_TIMEOUT")
 
     if not default_timeout:
         default_timeout = 300
@@ -337,7 +343,9 @@ def main():
         default_timeout = float(default_timeout)
 
     if not api_user or not api_passwd:
-        module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
+        module.fail_json(
+            msg="""Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments."""
+        )
 
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.
@@ -347,13 +355,13 @@ def main():
         run(module, server_manager)
     except Exception as e:
         import traceback
+
         module.fail_json(msg=str(e) + str(traceback.format_exc()))
 
 
 # the required module boilerplate
 #
 
-from ansible.module_utils.basic import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
