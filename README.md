@@ -1,4 +1,5 @@
 # upcloud-ansible
+
 Dynamic inventory and modules for managing servers via UpCloud's API
 
 The inventory script and modules contain documentation and examples as per
@@ -9,26 +10,27 @@ within Ansible and the plan is to open a PR for the modules too
 
 **Dependencies and supported versions**
 
-* `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
+- `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
-* python 2.7, 3.6 and higher versions are supported by `upcloud-api`
-* tested with ansible 1.9, 2.0 and all the way to 2.10.6.
-* It should work with whatever is the newest version of ansible, if not, please create an issue about it.
+- python 2.7, 3.6 and higher versions are supported by `upcloud-api`
+- tested with ansible 1.9, 2.0 and all the way to 2.10.6.
+- It should work with whatever is the newest version of ansible, if not, please create an issue about it.
 
 Note for OS X users:
-* install ansible with homebrew can make it hard to know what Python ansible is using, using `pip install ansible` is recommended
+
+- install ansible with homebrew can make it hard to know what Python ansible is using, using `pip install ansible` is recommended
 
 ## Inventory script
 
 **Installation**
 
-* move to any location you wish, point to the script with `ansible -i /path/to/script/upcloud.py`
-* note that upcloud.ini and upcloud.py must be in the same folder; see .ini for settings
-* you may wish to use `return_ip_addresses = True` in .ini to ensure that SSH works (hostnames may not be in DNS)
-* information on configuring the inventory without specifying `-i` every time:
-[http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx](http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx)
-* Define upcloud api user and password in the .ini file or in env variables.
-* Default timeout is defined either in the .ini file or as env variable. (default is 300s)
+- move to any location you wish, point to the script with `ansible -i /path/to/script/upcloud.py`
+- note that upcloud.ini and upcloud.py must be in the same folder; see .ini for settings
+- you may wish to use `return_ip_addresses = True` in .ini to ensure that SSH works (hostnames may not be in DNS)
+- information on configuring the inventory without specifying `-i` every time:
+  [http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx](http://stackoverflow.com/questions/21958727/where-to-store-ansible-host-file-on-osx)
+- Define upcloud api user and password in the .ini file or in env variables.
+- Default timeout is defined either in the .ini file or as env variable. (default is 300s)
 
 **Usage**
 
@@ -47,12 +49,12 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 
 **Installation**
 
-* move the modules to a location of your choice
-* make sure to add the location of your choice into library path:
-    * [ansible.cfg](http://docs.ansible.com/intro_configuration.html#library)
-    * [environment variable or CLI option](http://docs.ansible.com/developing_modules.html)
-* ...or provide module path when invoking ansible:
-    * `ansible-playbook -M /path/to/modules/dir playbook.yml`
+- move the modules to a location of your choice
+- make sure to add the location of your choice into library path:
+  - [ansible.cfg](http://docs.ansible.com/intro_configuration.html#library)
+  - [environment variable or CLI option](http://docs.ansible.com/developing_modules.html)
+- ...or provide module path when invoking ansible:
+  - `ansible-playbook -M /path/to/modules/dir playbook.yml`
 
 **Usage**
 
@@ -69,7 +71,6 @@ See the source files for documentation and examples. You may also want to refer 
 The following example shows off some of the features of `upcloud`, `upcloud_tag` and `upcloud_firewall` modules:
 
 ```yaml
-
 ---
 - hosts: localhost
   connection: local
@@ -85,15 +86,14 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         zone: uk-lon1
         plan: 1xCPU-1GB
         storage_devices:
-            - { size: 30, os: Ubuntu 14.04 } # This will soon be changed to use os id instead of name, due to upcloud-python-api changes
-            - { size: 100 }
+          - { size: 30, os: Ubuntu 14.04 } # This will soon be changed to use os id instead of name, due to upcloud-python-api changes
+          - { size: 100 }
         api_user: username
         api_passwd: password
         ssh_keys:
-            - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
-            - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
+          - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
+          - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
       register: upcloud_server # upcloud_server.server will contain the API response body
-
 
     # upcloud_server.public_ip shortcut will contain a public IPv4 (preferred) or IPv6 address
     # this task is not needed if host_key_checking=False in ansible
@@ -102,60 +102,57 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         state: absent
         host: "{{ upcloud_server.public_ip }}"
 
-
     - name: Wait for SSH to come up
       wait_for: host={{ upcloud_server.public_ip }} port=22 delay=5 timeout=320 state=started
-
 
     - name: tag the created server
       upcloud_tag:
         state: present
         uuid: "{{ upcloud_server.server.uuid }}"
-        tags: [ webservers, london ]
-
+        tags: [webservers, london]
 
     - name: configure firewall
       upcloud_firewall:
         state: present
         uuid: "{{ upcloud_server.server.uuid }}"
         firewall_rules:
-        - direction: in
-          family: IPv4
-          protocol: udp
-          destination_port_start: 53
-          destination_port_end: 53
-          action: accept
+          - direction: in
+            family: IPv4
+            protocol: udp
+            destination_port_start: 53
+            destination_port_end: 53
+            action: accept
 
-        - direction: in
-          family: IPv4
-          protocol: tcp
-          destination_port_start: 22
-          destination_port_end: 22
-          action: accept
+          - direction: in
+            family: IPv4
+            protocol: tcp
+            destination_port_start: 22
+            destination_port_end: 22
+            action: accept
 
-        - direction: in
-          family: IPv4
-          protocol: tcp
-          destination_port_start: 80
-          destination_port_end: 80
-          action: accept
+          - direction: in
+            family: IPv4
+            protocol: tcp
+            destination_port_start: 80
+            destination_port_end: 80
+            action: accept
 
-        - direction: in
-          family: IPv4
-          protocol: tcp
-          destination_port_start: 443
-          destination_port_end: 443
-          action: accept
+          - direction: in
+            family: IPv4
+            protocol: tcp
+            destination_port_start: 443
+            destination_port_end: 443
+            action: accept
 
-        # default rule last:
-        - direction: in
-          action: drop
+          # default rule last:
+          - direction: in
+            action: drop
 ```
 
 Tests located in `project_root/test/` directory. Run with:
 
 ```python
-py.test test/
+pytest test/
 ```
 
 To test against all supported python versions, run (will also run flake8 checks):
