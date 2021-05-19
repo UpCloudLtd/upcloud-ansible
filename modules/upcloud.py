@@ -350,7 +350,7 @@ def main():
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.
 
-    server_manager = ServerManager(api_user, api_passwd, default_timeout)
+    server_manager = ServerManager(api_user, api_passwd, default_timeout, module)
     try:
         run(module, server_manager)
     except Exception as e:

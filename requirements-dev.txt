@@ -1,4 +1,4 @@
-ansible==2.10.6
+ansible==2.10.9
 attrs==20.3.0
 black~=21.4b1
 coverage==5.5

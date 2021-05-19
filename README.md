@@ -4,16 +4,13 @@ Dynamic inventory and modules for managing servers via UpCloud's API
 
 The inventory script and modules contain documentation and examples as per
 [Ansible's developer guidelines](http://docs.ansible.com/developing_modules.html).
-There is an [open PR](https://github.com/ansible/ansible/pull/11586) for the inventory script to be included
-within Ansible and the plan is to open a PR for the modules too
-[ansible](https://github.com/ansible/ansible)
 
-**Dependencies and supported versions**
+## Dependencies and supported versions
 
-- `upcloud-api>=0.3.4` must be installed, `pip install upcloud-api` or get the sources from
+- `upcloud-api>=2.0.0` must be installed, `pip install upcloud-api` or get the sources from
   [Github](https://github.com/UpCloudLtd/upcloud-python-api)
-- python 2.7, 3.6 and higher versions are supported by `upcloud-api`
-- tested with ansible 1.9, 2.0 and all the way to 2.10.6.
+- python 3.6 and higher versions are supported by `upcloud-api`
+- tested with ansible 2.10.9
 - It should work with whatever is the newest version of ansible, if not, please create an issue about it.
 
 Note for OS X users:
@@ -22,7 +19,7 @@ Note for OS X users:
 
 ## Inventory script
 
-**Installation**
+### Installation
 
 - move to any location you wish, point to the script with `ansible -i /path/to/script/upcloud.py`
 - note that upcloud.ini and upcloud.py must be in the same folder; see .ini for settings
@@ -32,7 +29,7 @@ Note for OS X users:
 - Define upcloud api user and password in the .ini file or in env variables.
 - Default timeout is defined either in the .ini file or as env variable. (default is 300s)
 
-**Usage**
+### Usage
 
 ```
 # match all servers
@@ -47,7 +44,7 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 
 ## UpCloud modules
 
-**Installation**
+### Installation
 
 - move the modules to a location of your choice
 - make sure to add the location of your choice into library path:
@@ -56,7 +53,7 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 - ...or provide module path when invoking ansible:
   - `ansible-playbook -M /path/to/modules/dir playbook.yml`
 
-**Usage**
+### Usage
 
 ```
 
@@ -86,10 +83,10 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
         zone: uk-lon1
         plan: 1xCPU-1GB
         storage_devices:
-          - { size: 30, os: Ubuntu 14.04 } # This will soon be changed to use os id instead of name, due to upcloud-python-api changes
+          - { size: 30, os: 01000000-0000-4000-8000-000030200200 } # Note this is Ubuntu server 20.04 template UUID
           - { size: 100 }
-        api_user: username
-        api_passwd: password
+        api_user: <YOUR UPCLOUD USERNAME>
+        api_passwd: <YOUR UPCLOUD PASSWORD>
         ssh_keys:
           - ssh-rsa AAAAB3NzaC1yc2EAA[...]ptshi44x user@some.host
           - ssh-dss AAAAB3NzaC1kc3MAA[...]VHRzAA== someuser@some.other.host
