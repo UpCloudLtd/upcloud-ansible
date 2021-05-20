@@ -16,7 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
-DOCUMENTATION = '''
+import os
+from upcloud_api.errors import UpCloudAPIError
+from ansible.module_utils.basic import AnsibleModule
+from distutils.version import LooseVersion
+
+DOCUMENTATION = """
 ---
 
 module: upcloud_tag
@@ -53,9 +58,9 @@ notes:
 requirements:
   - "python >= 2.6"
   - "upcloud-api >= 0.3.4"
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 
 # Make sure that the firewall rules below are present.
 # If any given field does not match an existing host rule,
@@ -71,8 +76,8 @@ EXAMPLES = '''
         protocol: tcp,
         source_address_start: 192.168.1.1,
         source_address_end: 192.168.1.255,
-        destination_port_start: 22, 
-        destination_port_end: 22, 
+        destination_port_start: 22,
+        destination_port_end: 22,
         action: reject
 
       - direction: in,
@@ -80,8 +85,8 @@ EXAMPLES = '''
         protocol: tcp,
         source_address_start: 192.168.1.1,
         source_address_end: 192.168.1.255,
-        destination_port_start: 21, 
-        destination_port_end: 21, 
+        destination_port_start: 21,
+        destination_port_end: 21,
         action: reject
 
 # Make sure that the firewall rule below is not present.
@@ -97,8 +102,8 @@ EXAMPLES = '''
         protocol: tcp,
         source_address_start: 192.168.1.1,
         source_address_end: 192.168.1.255,
-        destination_port_start: 21, 
-        destination_port_end: 21, 
+        destination_port_start: 21,
+        destination_port_end: 21,
         action: reject
 
 # Rules may also be deleted by matching just one field,
@@ -121,27 +126,19 @@ EXAMPLES = '''
     hostname: www13.example.com
     firewall_rules:
       - direction: in
-'''
+"""
 
-from distutils.version import LooseVersion
-from upcloud_api.errors import UpCloudClientError, UpCloudAPIError
-
-import os
 
 # make sure that upcloud-api is installed
 HAS_UPCLOUD = True
 try:
     import upcloud_api
-    from upcloud_api import CloudManager
 
-    if LooseVersion(upcloud_api.__version__) < LooseVersion('0.3.5'):
-        HAS_UPCLOUD = False
-
-except ImportError, e:
+except ImportError:
     HAS_UPCLOUD = False
 
 
-class FirewallManager():
+class FirewallManager:
     """Helpers for managing upcloud_api.FirewallRule (and upcloud_api.Server) instance"""
 
     def __init__(self, username, password, module):
@@ -161,12 +158,14 @@ class FirewallManager():
                 found_servers.append(server)
 
         if len(found_servers) > 1:
-            self.module.fail_json(msg='More than one server matched the given hostname. Please use unique hostnames.')
+            self.module.fail_json(
+                msg="More than one server matched the given hostname. Please use unique hostnames."
+            )
 
         if len(found_servers) == 1:
             return found_servers[0].uuid
         else:
-            self.module.fail_json(msg='No server was found with hostname: ' + hostname)
+            self.module.fail_json(msg="No server was found with hostname: " + hostname)
 
     def determine_server_uuid_by_ip(self, ip_address):
         """
@@ -177,8 +176,10 @@ class FirewallManager():
             machine = self.manager.get_server_by_ip(ip_address)
             return machine.uuid
         except UpCloudAPIError as e:
-            if e.error_code == 'IP_ADDRESS_NOT_FOUND':
-                self.module.fail_json(msg='No server was found with IP-address: ' + ip_address)
+            if e.error_code == "IP_ADDRESS_NOT_FOUND":
+                self.module.fail_json(
+                    msg="No server was found with IP-address: " + ip_address
+                )
             else:
                 raise
 
@@ -187,8 +188,9 @@ class FirewallManager():
         Checks given_rule against every host_rule.
         False if no matches were found, True if a match was found.
         """
+
         def match_firewall_rule(given_rule, host_rule):
-            """ Match given_rule against one host_rule """
+            """Match given_rule against one host_rule"""
             for field in given_rule:
                 if str(given_rule[field]) != str(getattr(host_rule, field)):
                     return False
@@ -211,11 +213,11 @@ def run(module, firewall_manager):
         delete any given rule that matches an existing one
     """
 
-    state =          module.params['state']
-    firewall_rules = module.params['firewall_rules']
-    uuid =           module.params.get('uuid')
-    hostname =       module.params.get('hostname')
-    ip_address =     module.params.get('ip_address')
+    state = module.params["state"]
+    firewall_rules = module.params["firewall_rules"]
+    uuid = module.params.get("uuid")
+    hostname = module.params.get("hostname")
+    ip_address = module.params.get("ip_address")
 
     changed = False
 
@@ -228,7 +230,7 @@ def run(module, firewall_manager):
     host_rules = firewall_manager.manager.get_firewall_rules(uuid)
 
     # match every rule against host_rules
-    if state == 'present':
+    if state == "present":
         for rule in firewall_rules:
             matched, position = firewall_manager.match_firewall_rules(rule, host_rules)
 
@@ -237,14 +239,15 @@ def run(module, firewall_manager):
                 firewall_manager.manager.create_firewall_rule(uuid, rule)
                 changed = True
 
-
     # delete any given rule that matches an existing one
-    if state == 'absent':
+    if state == "absent":
         for rule in firewall_rules:
 
             # each given rule can match multiple times
             while True:
-                matched, position = firewall_manager.match_firewall_rules(rule, host_rules)
+                matched, position = firewall_manager.match_firewall_rules(
+                    rule, host_rules
+                )
                 if matched:
                     firewall_manager.manager.delete_firewall_rule(uuid, position)
                     changed = True
@@ -257,39 +260,36 @@ def run(module, firewall_manager):
     module.exit_json(changed=changed)
 
 
-
 def main():
     """main execution path"""
-
     module = AnsibleModule(
-        argument_spec = dict(
-            state = dict(choices=['present', 'absent'], default='present'),
-            api_user = dict(aliases=['UPCLOUD_API_USER'], no_log=True),
-            api_passwd = dict(aliases=['UPCLOUD_API_PASSWD'], no_log=True),
-
-            hostname = dict(type='str'),
-            ip_address = dict(type='str'),
-            uuid = dict(aliases=['id'], type='str'),
-            firewall_rules = dict(type='list', required=True)
+        argument_spec=dict(
+            state=dict(choices=["present", "absent"], default="present"),
+            api_user=dict(aliases=["UPCLOUD_API_USER"], no_log=True),
+            api_passwd=dict(aliases=["UPCLOUD_API_PASSWD"], no_log=True),
+            hostname=dict(type="str"),
+            ip_address=dict(type="str"),
+            uuid=dict(aliases=["id"], type="str"),
+            firewall_rules=dict(type="list", required=True),
         ),
-        required_one_of = (
-            ['uuid', 'hostname','ip_address'],
-        )
+        required_one_of=(["uuid", "hostname", "ip_address"],),
     )
-
 
     # ensure dependencies and API credentials are in place
     #
 
     if not HAS_UPCLOUD:
-        module.fail_json(msg='upcloud-api required for this module (`pip install upcloud-api`)')
+        module.fail_json(
+            msg="upcloud-api required for this module (`pip install upcloud-api`)"
+        )
 
-    api_user = module.params.get('api_user') or os.getenv('UPCLOUD_API_USER')
-    api_passwd = module.params.get('api_passwd') or os.getenv('UPCLOUD_API_PASSWD')
+    api_user = module.params.get("api_user") or os.getenv("UPCLOUD_API_USER")
+    api_passwd = module.params.get("api_passwd") or os.getenv("UPCLOUD_API_PASSWD")
 
     if not api_user or not api_passwd:
-        module.fail_json(msg='''Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments.''')
-
+        module.fail_json(
+            msg="""Please set UPCLOUD_API_USER and UPCLOUD_API_PASSWD environment variables or provide api_user and api_passwd arguments."""
+        )
 
     # begin execution. Catch all unhandled exceptions.
     # Note: UpCloud's API has good error messages that the api client passes on.
@@ -300,13 +300,13 @@ def main():
         run(module, firewall_manager)
     except Exception as e:
         import traceback
+
         module.fail_json(msg=str(e) + str(traceback.format_exc()))
 
 
 # the required module boilerplate
 #
 
-from ansible.module_utils.basic import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

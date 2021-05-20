@@ -1,0 +1,47 @@
+[flake8]
+ignore = D100,  # missing docstring in public module
+         D104,
+         D105,
+         D200,  # one line docstring should fit on one line with quotes
+         D202,
+         D203,  # 1 blank line required before class docstring
+         D205,  # blank line required after description (in docstrings)
+         D400,
+         D401,
+         D403,
+         # ignore line length problems; those are fixed by black
+         E501
+         # via black
+         E203
+         H101,
+         H238,
+         H301,
+         H304,
+         H306,
+         H404,
+         H405,
+         E114, # Ignore line length for comments,
+         F403, # Import rule, exception for ansible boilerplate,
+         F405, # Import rule, exception for ansible boilerplate
+         W503
+
+exclude =
+    # No need to traverse our git directory
+    .git,
+    # There's no value in checking cache directories
+    __pycache__,
+    # ...or test cache directories
+    .pytest_cache,
+    # Ignore virtualenv
+    ENV,
+    # Ignore tox directory
+    .tox
+max-line-length = 99
+per-file-ignores =
+     inventory/upcloud.py: E501,
+     modules/upcloud_firewall.py: E501, E402
+     modules/upcloud_tag.py: E501, E402
+     modules/upcloud.py: E501, E402
+     test/*: D101,D102,D103,F841,S101,S106,B011
+     # ignore "imported but not used" in any __init__.pys
+     */__init__.py: F401
