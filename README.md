@@ -1,5 +1,9 @@
 # upcloud-ansible
 
+> **DEPRECATION NOTICE**
+>
+> This repo won't receive more feature or version updates. We suggest using [UpCloud Terraform Provider](https://github.com/UpCloudLtd/terraform-provider-upcloud) for creating infrastructure and [UpCloud Ansible Collection](https://github.com/UpCloudLtd/upcloud-ansible-collection) for provisioning and modification.
+
 Dynamic inventory and modules for managing servers via UpCloud's API
 
 The inventory script and modules contain documentation and examples as per
@@ -31,7 +35,7 @@ Note for OS X users:
 
 ### Usage
 
-```
+```bash
 # match all servers
 ansible all -m ping -i /path/to/upcloud.py
 
@@ -55,7 +59,7 @@ ansible <any-upcloud-tag> -m <module> -i <path-to-upcloud-inventory>
 
 ### Usage
 
-```
+```bash
 
 # you can specify inventory and Modules pathes via cli
 ansible-playbook create-servers.yml -i /path/to/upcloud.py -M /path/to/upcloud/modules
@@ -146,32 +150,39 @@ The following example shows off some of the features of `upcloud`, `upcloud_tag`
             action: drop
 ```
 
+## Testing
+
 Tests located in `project_root/test/` directory. Run with:
 
-```python
+```bash
 pytest test/
 ```
 
 To test against all supported python versions, run (will also run flake8 checks):
 
-```python
+```bash
 tox
 ```
 
 To check for possible vulnerabilities in python packages, run:
 
-```python
+```bash
 safety check
 ```
 
 To check for flake8 errors, run:
 
-```python
+```bash
 flake8
 ```
 
 For tests, flake8 and safety check to work - additional dependencies need to be installed:
 
-```python
+```bash
 pip install -r requirements-dev.txt
 ```
+
+## Bugs, Issues, Problems, Ideas
+
+Please report issues and features requests through
+[the issues page](https://github.com/UpCloudLtd/upcloud-ansible/issues).
