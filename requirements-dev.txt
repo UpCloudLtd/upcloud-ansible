@@ -35,4 +35,4 @@ toml==0.10.2
     #   pep517
     #   pytest
 upcloud-api==2.0.0
-urllib3==1.25.9
+urllib3==1.26.5
