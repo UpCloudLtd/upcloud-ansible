@@ -2,7 +2,7 @@
 
 > **DEPRECATION NOTICE**
 >
-> This repo won't receive more feature or version updates. We suggest using [UpCloud Terraform Provider](https://github.com/UpCloudLtd/terraform-provider-upcloud) for creating infrastructure and [UpCloud Ansible Collection](https://github.com/UpCloudLtd/upcloud-ansible-collection) for provisioning and modification.
+> This repo has been deprecated and won't receive more fixes, features or version updates. We suggest using [UpCloud Terraform Provider](https://github.com/UpCloudLtd/terraform-provider-upcloud) for creating infrastructure and [UpCloud Ansible Collection](https://github.com/UpCloudLtd/upcloud-ansible-collection) for provisioning and modification.
 
 Dynamic inventory and modules for managing servers via UpCloud's API
 
